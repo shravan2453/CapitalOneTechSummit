@@ -15,6 +15,7 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, setPage }) => {
     { id: 'comparison', label: 'Loan Comparison', icon: 'scale' },
     { id: 'calculator', label: 'Calculator', icon: 'calculator' },
     { id: 'optimizer', label: 'Optimizer', icon: 'sparkles' },
+    { id: 'my-loans', label: 'My Loans', icon: 'wallet' },
     { id: 'profile', label: 'Profile', icon: 'user' },
   ];
 

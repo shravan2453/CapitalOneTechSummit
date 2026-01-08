@@ -11,6 +11,7 @@ import ComparisonPage from './pages/ComparisonPage';
 import CalculatorPage from './pages/CalculatorPage';
 import OptimizerPage from './pages/OptimizerPage';
 import ProfilePage from './pages/ProfilePage';
+import MyLoansPage from './pages/MyLoansPage';
 import './styles/globals.css';
 
 const AppContent: React.FC = () => {
@@ -54,7 +55,7 @@ const AppContent: React.FC = () => {
         
         // Redirect to profile if incomplete and user is on a protected page
         if (!complete && !hasRedirectedRef.current) {
-          const protectedPages = ['dashboard', 'comparison', 'calculator', 'optimizer'];
+          const protectedPages = ['dashboard', 'comparison', 'calculator', 'optimizer', 'my-loans'];
           setCurrentPage(prevPage => {
             if (protectedPages.includes(prevPage)) {
               hasRedirectedRef.current = true;
@@ -73,7 +74,7 @@ const AppContent: React.FC = () => {
         // On error, redirect to profile if on protected page
         if (!hasRedirectedRef.current) {
           setCurrentPage(prevPage => {
-            const protectedPages = ['dashboard', 'comparison', 'calculator', 'optimizer'];
+            const protectedPages = ['dashboard', 'comparison', 'calculator', 'optimizer', 'my-loans'];
             if (protectedPages.includes(prevPage)) {
               hasRedirectedRef.current = true;
               return 'profile';
@@ -130,7 +131,7 @@ const AppContent: React.FC = () => {
 
   // Redirect to login if user tries to access protected routes without authentication
   useEffect(() => {
-    if (!loading && !user && ['dashboard', 'comparison', 'calculator', 'optimizer', 'profile'].includes(currentPage)) {
+    if (!loading && !user && ['dashboard', 'comparison', 'calculator', 'optimizer', 'profile', 'my-loans'].includes(currentPage)) {
       setCurrentPage('login');
     }
   }, [user, loading, currentPage]);
@@ -167,6 +168,8 @@ const AppContent: React.FC = () => {
         return <OptimizerPage />;
       case 'profile':
         return <ProfilePage />;
+      case 'my-loans':
+        return <MyLoansPage />;
       default:
         return <LandingPage setPage={setCurrentPage} />;
     }
