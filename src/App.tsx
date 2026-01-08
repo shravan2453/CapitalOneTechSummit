@@ -10,6 +10,7 @@ import ComparisonPage from './pages/ComparisonPage';
 import CalculatorPage from './pages/CalculatorPage';
 import OptimizerPage from './pages/OptimizerPage';
 import ProfilePage from './pages/ProfilePage';
+import LoansForm from './pages/LoansForm';
 import './styles/globals.css';
 
 const AppContent: React.FC = () => {
@@ -31,6 +32,38 @@ const AppContent: React.FC = () => {
     
     initIcons();
   }, [currentPage]);
+
+  // Map URL pathname to internal page state on first mount (so direct links work)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const path = window.location.pathname.replace(/\/+$/g, '') || '/';
+    const mapPathToPage = (p: string) => {
+      switch (p) {
+        case '/':
+        case '/landing':
+          return 'landing';
+        case '/login':
+          return 'login';
+        case '/signup':
+          return 'signup';
+        case '/dashboard':
+          return 'dashboard';
+        case '/comparison':
+          return 'comparison';
+        case '/calculator':
+          return 'calculator';
+        case '/optimizer':
+          return 'optimizer';
+        case '/profile':
+          return 'profile';
+        case '/loanform':
+          return 'loanform';
+        default:
+          return 'landing';
+      }
+    };
+    setCurrentPage(mapPathToPage(path));
+  }, []);
 
   // Redirect to login if trying to access protected routes without auth
   useEffect(() => {
@@ -68,6 +101,8 @@ const AppContent: React.FC = () => {
         return <OptimizerPage />;
       case 'profile':
         return <ProfilePage />;
+      case 'loanform':
+        return <LoansForm />
       default:
         return <LandingPage setPage={setCurrentPage} />;
     }
