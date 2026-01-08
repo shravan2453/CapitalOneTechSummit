@@ -1,15 +1,14 @@
-# Capital One Tech Summit
+# Capital One Tech Summit - Loan Comparison App
 
-A modern React application built with Vite, TypeScript, and Tailwind CSS. This app provides a comprehensive financial dashboard with features for credit card comparison, interest calculation, credit optimization, and profile management.
+A Next.js web application that allows students to compare loan options, customize repayment plans, and optimize their loan strategy based on their personal financial situation.
 
 ## Features
 
-- 📊 **Dashboard** - Overview of financial metrics and recent activity
-- 📈 **Comparison** - Compare different credit card options
-- 🧮 **Calculator** - Calculate interest on loans and investments
-- ⚡ **Optimizer** - Get recommendations to optimize your credit score
-- 👤 **Profile** - Manage your account settings and preferences
-
+- **Dashboard** - Overview of financial metrics and recent activity
+- **Comparison** - Compare different credit card options
+- **Calculator** - Calculate interest on loans and investments
+- **Optimizer** - Get recommendations to optimize your credit score
+- **Profile** - Manage your account settings and preferences
 ## Tech Stack
 
 - **React 18** - Modern React with hooks
@@ -18,55 +17,50 @@ A modern React application built with Vite, TypeScript, and Tailwind CSS. This a
 - **Tailwind CSS** - Utility-first CSS framework
 - **Lucide React** - Beautiful icon library
 
+## Prerequisites
+
+- Node.js 18+ and npm (or yarn/ppm)
+
 ## Getting Started
 
-### Prerequisites
+### 1. Install Dependencies
 
-- Node.js 18+ and npm (or yarn/pnpm)
-
-### Installation
-
-1. Install dependencies:
 ```bash
 npm install
 ```
 
-2. Start the development server:
+### 2. Set Up Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=supabase_anon_key
+```
+
+**To get the Supabase credentials:**
+1. Go to the Supabase project dashboard
+2. Navigate to **Settings** → **API**
+3. Copy the **Project URL** and **anon public** key
+4. Paste them into your `.env.local` file
+
+### 3. Install Supabase Package
+
+If you get import errors, make sure the Supabase package is installed:
+
+```bash
+npm install @supabase/supabase-js
+```
+
+### 4. Start Development Server
+
 ```bash
 npm run dev
 ```
 
-3. Open your browser and navigate to `http://localhost:5173`
+Open your browser and navigate to `http://localhost:5173`
 
-### Build for Production
-
-```bash
-npm run build
-```
-
-The production build will be in the `dist` directory.
-
-### Preview Production Build
-
-```bash
-npm run preview
-```
-
-## Deployment to Vercel
-
-This project is configured for easy deployment to Vercel:
-
-1. Push your code to GitHub
-2. Import your repository in Vercel
-3. Vercel will automatically detect the Vite configuration
-4. Deploy!
-
-Alternatively, use the Vercel CLI:
-
-```bash
-npm i -g vercel
-vercel
-```
+**Note:** After creating or updating `.env.local`, you must restart your dev server for changes to take effect.
 
 ## Project Structure
 
