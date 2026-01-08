@@ -1,12 +1,29 @@
 import React from 'react';
 import { Card, Button, PageHeader } from '../components/shared';
 import { Wallet, Calendar, Percent, ArrowDown } from 'lucide-react';
+import {useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase'
 
-const DashboardPage: React.FC = () => (
+
+const DashboardPage: React.FC = () => {
+  const [userName, setUserName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const {data} = await supabase.auth.getUser();
+      if (data?.user){
+        setUserName(data.user.user_metadata?.full_name || data.user.email);
+      }
+    }
+    loadUser();
+  }, []);
+  
+  
+  return (
   <div className="animate-enter">
     <PageHeader 
       title="Financial Overview" 
-      subtitle="Welcome back, Alex. Your loan optimization is on track."
+      subtitle={`Welcome back${userName? `, ${userName}`: ''}. Your loan optimization is on track.`}
       action={<Button variant="primary" icon="download">Download Report</Button>}
     />
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 mb-12">
@@ -163,5 +180,5 @@ const DashboardPage: React.FC = () => (
     </div>
   </div>
 );
-
+}
 export default DashboardPage;
