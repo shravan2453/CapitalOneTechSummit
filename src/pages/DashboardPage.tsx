@@ -4,10 +4,16 @@ import { Wallet, Calendar, Percent, ArrowDown } from 'lucide-react';
 import {useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase'
 
+// hardcoding two payment plans with random data right now, will do via calculations later
+const payoffPlans: Record<string, number[]> = {
+  'standard': [65, 62, 58, 55, 50, 48, 45, 42, 38, 35, 30, 25],
+  'aggressive': [65, 55, 48, 42, 36, 30, 25, 20, 15, 10, 6, 3],
+};
 
 const DashboardPage: React.FC = () => {
   const [userName, setUserName] = useState<string | null>(null);
-
+  const [plan, setPlan] = useState<string | "standard">("standard")
+  const payoffChartData = payoffPlans[plan];
   useEffect(() => {
     const loadUser = async () => {
       const {data} = await supabase.auth.getUser();
@@ -111,16 +117,20 @@ const DashboardPage: React.FC = () => {
           <Card className="h-full">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
               <h3 className="font-bold text-gray-900 text-base sm:text-lg">Payoff Trajectory</h3>
-              <select className="text-xs border border-cap-red/20 rounded-lg px-3 py-1.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-cap-red/20 w-full sm:w-auto" style={{
+              <select 
+              value={plan}
+              onChange={(e)=>setPlan(e.target.value)}
+              className="text-xs border border-cap-red/20 rounded-lg px-3 py-1.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-cap-red/20 w-full sm:w-auto"
+              style={{
                 background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
                 boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(200, 16, 46, 0.2), 0 2px 4px rgba(200, 16, 46, 0.1)'
               }}>
-                <option>Standard Plan</option>
-                <option>Aggressive</option>
+                <option value="standard">Standard Plan</option>
+                <option value="aggressive">Aggressive</option>
               </select>
             </div>
             <div className="h-48 sm:h-64 flex items-end justify-between gap-2 sm:gap-3 px-2 overflow-x-auto">
-              {[65, 62, 58, 55, 50, 48, 45, 42, 38, 35, 30, 25].map((h, i) => (
+              {payoffChartData.map((h, i) => (
                 <div key={i} className="flex-1 min-w-[20px] rounded-t-lg relative group overflow-hidden border border-cap-red/20" style={{
                   height: `${h}%`,
                   background: 'linear-gradient(180deg, #F3F4F6 0%, #E5E7EB 100%)',
