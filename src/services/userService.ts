@@ -22,19 +22,8 @@ export interface UserRecord {
   prioritize: string;
 }
 
-/**
- * Service for managing user profiles
- * Handles CRUD operations on the users table
- */
 export const userService = {
-  /**
-   * Get user by email address
-   * This is the primary method used in the app because Supabase Auth provides user.email
-   * when a user logs in. Email is also the unique identifier in the users table.
-   * 
-   * @param email - User's email address
-   * @returns UserRecord if found, null if user doesn't exist (first-time user)
-   */
+  // Get user by email
   async getUserByEmail(email: string): Promise<UserRecord | null> {
     const { data, error } = await supabase
       .from('users')
@@ -43,7 +32,7 @@ export const userService = {
       .single();
 
     if (error) {
-      // PGRST116 = no rows returned (user doesn't exist - normal for first-time users)
+      // PGRST116 = no rows returned (user doesn't exist, first time user)
       if (error.code === 'PGRST116') {
         return null;
       }
@@ -53,18 +42,7 @@ export const userService = {
     return data;
   },
 
-  /**
-   * Get user by UUID ID
-   * This method exists for potential future use cases, such as:
-   * - Looking up users by their database ID
-   * - Working with foreign key relationships
-   * - Admin operations that might have the ID but not the email
-   * 
-   * Currently not used in the app, but kept for flexibility.
-   * 
-   * @param id - User's UUID from the database
-   * @returns UserRecord if found, null if user doesn't exist
-   */
+  // Get user by ID (for future use!)
   async getUserById(id: string): Promise<UserRecord | null> {
     const { data, error } = await supabase
       .from('users')
@@ -73,6 +51,7 @@ export const userService = {
       .single();
 
     if (error) {
+      // Same error handling as getUserByEmail
       if (error.code === 'PGRST116') {
         return null;
       }
@@ -82,13 +61,7 @@ export const userService = {
     return data;
   },
 
-  /**
-   * Create or update user profile (uses email as unique identifier)
-   * If user exists, updates their profile. If not, creates a new profile.
-   * 
-   * @param userData - User profile data (email is required and used as unique identifier)
-   * @returns Created or updated user record
-   */
+  // Create or update user profile (uses email as unique identifier)
   async upsertUser(userData: {
     email: string;
     name?: string;
@@ -127,17 +100,11 @@ export const userService = {
     return data;
   },
 
-  /**
-   * Check if user profile is complete
-   * A complete profile has all required fields filled in
-   * 
-   * @param user - UserRecord to check, or null
-   * @returns true if profile is complete, false otherwise
-   */
+  // Check if profile is complete
   isProfileComplete(user: UserRecord | null): boolean {
     if (!user) return false;
     
-    // Required fields for a complete profile:
+    // Required fields:
     return !!(
       user.name &&
       user.age &&

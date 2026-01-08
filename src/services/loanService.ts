@@ -1,10 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { userService } from './userService';
 
-/**
- * Loan record from the loans table
- * Loans are user-specific - each user only sees and manages their own loans
- */
 export interface LoanRecord {
   id: string;
   created_at: string;
@@ -23,10 +19,6 @@ export interface LoanRecord {
   repayment_plan: string | null; // User's repayment plan
 }
 
-/**
- * Data required to create a new loan
- * All fields are stored directly in the loans table (user-specific)
- */
 export interface CreateLoanData {
   name: string;
   type: string;
@@ -43,10 +35,8 @@ export interface CreateLoanData {
 }
 
 export const loanService = {
-  /**
-   * Get all loans for the current authenticated user
-   * Returns empty array if user doesn't have a profile yet
-   */
+  // Get all loans for the current authenticated user
+  // Returns empty array if user doesn't have a profile yet
   async getAllLoans(): Promise<LoanRecord[]> {
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -150,7 +140,7 @@ export const loanService = {
   },
 
   /**
-   * Update an existing loan (only if it belongs to current user)
+   * Update an existing loan
    * @param id - Loan UUID
    * @param loanData - Partial loan data to update
    * @returns Updated loan record
@@ -189,7 +179,7 @@ export const loanService = {
   },
 
   /**
-   * Delete a loan (only if it belongs to current user)
+   * Delete a loan
    * @param id - Loan UUID
    */
   async deleteLoan(id: string): Promise<void> {

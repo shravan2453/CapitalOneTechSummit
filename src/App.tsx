@@ -159,7 +159,7 @@ const AppContent: React.FC = () => {
       case 'signup':
         return <SignupPage setPage={setCurrentPage} />;
       case 'dashboard':
-        return <DashboardPage />;
+        return <DashboardPage setPage={setCurrentPage} />;
       case 'comparison':
         return <ComparisonPage setPage={setCurrentPage} />;
       case 'calculator':
