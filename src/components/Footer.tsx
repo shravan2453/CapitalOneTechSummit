@@ -44,7 +44,7 @@ const Footer: React.FC = () => {
           </div>
         </div>
         <div className="pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center text-xs text-gray-400">
-          <p>© 2023 LoanOS Inc. All rights reserved.</p>
+          <p>© 2023 OneLoan Inc. All rights reserved.</p>
           <p className="mt-2 md:mt-0">Estimates are for planning purposes only. Not financial advice.</p>
         </div>
       </div>

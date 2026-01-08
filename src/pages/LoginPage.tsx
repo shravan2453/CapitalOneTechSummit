@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/shared';
 import { Landmark, ArrowRight } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface LoginPageProps {
   setPage: (page: string) => void;
@@ -13,7 +14,14 @@ const LoginPage: React.FC<LoginPageProps> = ({ setPage }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { signIn, signInWithGoogle } = useAuth();
+  const { signIn, signInWithGoogle, user, loading: authLoading } = useAuth();
+
+  // Redirect when user becomes authenticated
+  useEffect(() => {
+    if (!authLoading && user) {
+      setPage('dashboard');
+    }
+  }, [user, authLoading, setPage]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +34,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ setPage }) => {
       setError(error.message);
       setLoading(false);
     } else {
-      // Redirect to dashboard on successful login
-      setPage('dashboard');
+      setLoading(false);
     }
   };
 
@@ -39,7 +46,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ setPage }) => {
       setError(error.message);
       setGoogleLoading(false);
     }
-    // Note: Google OAuth will redirect, so we don't need to handle success here
   };
 
   return (

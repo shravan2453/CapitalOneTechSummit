@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { User } from '@supabase/supabase-js';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { supabase } from './lib/supabase';
 import { userService } from './services/userService';
@@ -12,30 +13,22 @@ import CalculatorPage from './pages/CalculatorPage';
 import OptimizerPage from './pages/OptimizerPage';
 import ProfilePage from './pages/ProfilePage';
 import MyLoansPage from './pages/MyLoansPage';
+// import LoansForm from './pages/LoansForm'; // From loans-page branch
 import './styles/globals.css';
 
 const AppContent: React.FC = () => {
   // Current page state for navigation
   const [currentPage, setCurrentPage] = useState<string>('landing');
   
-  // Authentication state from context
   const { user, loading } = useAuth();
   
-  // Loading state for profile completion check
   const [checkingProfile, setCheckingProfile] = useState(false);
-  
-  // Refs to prevent multiple redirects and profile checks
-  const hasRedirectedRef = useRef(false); // Tracks if user has been redirected to profile page
-  const hasCheckedProfileRef = useRef(false); // Tracks if profile has been checked for current user session
+  const hasCheckedProfileRef = useRef(false);
+  const previousUserRef = useRef<User | null>(null);
 
-
-  // Check profile completion on user login
-  // Redirects to profile page if profile is incomplete and user tries to access protected pages
   useEffect(() => {
     const checkProfile = async () => {
-      // Reset refs if no user is logged in
       if (!user?.email) {
-        hasRedirectedRef.current = false;
         hasCheckedProfileRef.current = false;
         return;
       }
@@ -49,39 +42,9 @@ const AppContent: React.FC = () => {
       hasCheckedProfileRef.current = true;
       
       try {
-        // Fetch user profile and check if it's complete
-        const userRecord = await userService.getUserByEmail(user.email);
-        const complete = userService.isProfileComplete(userRecord);
-        
-        // Redirect to profile if incomplete and user is on a protected page
-        if (!complete && !hasRedirectedRef.current) {
-          const protectedPages = ['dashboard', 'comparison', 'calculator', 'optimizer', 'my-loans'];
-          setCurrentPage(prevPage => {
-            if (protectedPages.includes(prevPage)) {
-              hasRedirectedRef.current = true;
-              return 'profile';
-            }
-            return prevPage;
-          });
-        }
-        
-        // Reset redirect flag if profile is complete to allow nav
-        if (complete) {
-          hasRedirectedRef.current = false;
-        }
+        await userService.getUserByEmail(user.email);
       } catch (error) {
         console.error('Error checking profile:', error);
-        // On error, redirect to profile if on protected page
-        if (!hasRedirectedRef.current) {
-          setCurrentPage(prevPage => {
-            const protectedPages = ['dashboard', 'comparison', 'calculator', 'optimizer', 'my-loans'];
-            if (protectedPages.includes(prevPage)) {
-              hasRedirectedRef.current = true;
-              return 'profile';
-            }
-            return prevPage;
-          });
-        }
       } finally {
         setCheckingProfile(false);
       }
@@ -89,16 +52,24 @@ const AppContent: React.FC = () => {
 
     // Only check profile when auth is loaded and user is logged in
     if (!loading && user) {
+      const isNewLogin = !previousUserRef.current && user;
+      previousUserRef.current = user;
+      
+      if (isNewLogin) {
+        setTimeout(() => {
+          hasCheckedProfileRef.current = false;
+          checkProfile();
+        }, 500);
+        return;
+      }
+      
       checkProfile();
     } else if (!loading && !user) {
-      // Reset refs when user logs out
-      hasRedirectedRef.current = false;
       hasCheckedProfileRef.current = false;
+      previousUserRef.current = null;
     }
   }, [user, loading]);
 
-  // Listen for profile updates when user saves their profile
-  // Re-checks profile completion and allows navigation if profile is now complete
   useEffect(() => {
     const handleProfileUpdate = async () => {
       if (!user?.email) return;
@@ -107,14 +78,8 @@ const AppContent: React.FC = () => {
       try {
         // Small delay to ensure database has committed the changes
         await new Promise(resolve => setTimeout(resolve, 300));
-        const userRecord = await userService.getUserByEmail(user.email);
-        const complete = userService.isProfileComplete(userRecord);
-        
-        // If profile is now complete, reset flags to allow navigation
-        if (complete) {
-          hasRedirectedRef.current = false;
-          hasCheckedProfileRef.current = false;
-        }
+        await userService.getUserByEmail(user.email);
+        hasCheckedProfileRef.current = false;
       } catch (error) {
         console.error('Error checking profile after update:', error);
       } finally {
@@ -128,6 +93,13 @@ const AppContent: React.FC = () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate);
     };
   }, [user]);
+
+  // Redirect authenticated users from landing/login/signup to dashboard
+  useEffect(() => {
+    if (!loading && user && ['landing', 'login', 'signup'].includes(currentPage)) {
+      setCurrentPage('dashboard');
+    }
+  }, [user, loading, currentPage]);
 
   // Redirect to login if user tries to access protected routes without authentication
   useEffect(() => {
@@ -170,6 +142,8 @@ const AppContent: React.FC = () => {
         return <ProfilePage />;
       case 'my-loans':
         return <MyLoansPage />;
+      // case 'loanform':
+      //   return <LoansForm /> // From loans-page branch
       default:
         return <LandingPage setPage={setCurrentPage} />;
     }
@@ -188,8 +162,6 @@ const AppContent: React.FC = () => {
       </div>
     );
   }
-
-  // Main app layout
   return (
     <div className="min-h-screen font-sans selection:bg-cap-red selection:text-white" style={{
       background: 'linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 50%, #E5E7EB 100%)'

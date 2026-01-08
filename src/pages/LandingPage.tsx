@@ -43,7 +43,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
               >
                 <Landmark size={18} />
               </div>
-              <span className="font-bold text-xl tracking-tighter text-gray-900">LOANOS</span>
+              <span className="font-bold text-xl tracking-tighter text-gray-900">ONELOAN</span>
             </div>
 
             {/* Desktop Menu */}
@@ -81,14 +81,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
             {/* Auth Buttons */}
             <div className="flex items-center space-x-3">
               <button 
-                onClick={() => setPage('dashboard')} 
+                onClick={() => setPage('login')} 
                 className="text-sm font-medium text-cap-navy hover:text-gray-900 transition-colors"
               >
                 Sign In
               </button>
               <Button 
                 variant="primary" 
-                onClick={() => setPage('dashboard')}
+                onClick={() => setPage('signup')}
                 className="text-sm px-4 py-2"
               >
                 Create Account
@@ -130,13 +130,16 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
               >
                 Create Free Account <ArrowRight className="ml-2 w-4 h-4 inline" />
               </Button>
-              <Button 
-                variant="secondary" 
+              <button 
                 onClick={() => setPage('login')}
-                className="px-8 py-4 text-base border-white/30 text-white hover:bg-white/10"
+                className="px-8 py-4 text-base font-semibold rounded-xl text-white border-2 border-white/50 hover:bg-white/20 hover:border-white transition-all duration-200"
+                style={{
+                  background: 'transparent',
+                  backdropFilter: 'blur(10px)'
+                }}
               >
                 Sign In
-              </Button>
+              </button>
               </div>
             </div>
             
