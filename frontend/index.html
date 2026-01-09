@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Loan Optimizer</title>
+  <style>
+    :root {
+      --federal: #1e40af;
+      --state: #047857;
+      --private: #b91c1c;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      font-family: system-ui, -apple-system, sans-serif; 
+      color: var(--text); 
+      background: var(--bg); 
+      margin: 0; 
+      padding: 20px;
+      line-height: 1.5;
+    }
+    .container { max-width: 1200px; margin: 0 auto; }
+    h1 { margin: 0 0 8px; font-size: 1.75rem; }
+    h2 { margin: 24px 0 12px; font-size: 1.25rem; color: var(--text); }
+    h3 { margin: 16px 0 8px; font-size: 1.1rem; }
+    .subtitle { color: var(--muted); margin-bottom: 20px; }
+    
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    
+    /* Form styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-group label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .form-group label .required {
+      color: #dc2626;
+      margin-left: 2px;
+    }
+    .form-group input,
+    .form-group select {
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--federal);
+    }
+    .form-group small {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--federal);
+      color: white;
+    }
+    .btn-primary:hover { background: #1e3a8a; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #e2e8f0; }
+    
+    /* Loan catalog table */
+    .catalog-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .catalog-table th,
+    .catalog-table td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .catalog-table th {
+      background: #f8fafc;
+      font-weight: 600;
+    }
+    .catalog-table tr:hover {
+      background: #f8fafc;
+    }
+    .type-federal { background: #dbeafe !important; }
+    .type-state { background: #d1fae5 !important; }
+    .type-private { background: #fee2e2 !important; }
+    
+    /* Results */
+    .results { margin-top: 24px; }
+    .plan-card {
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      background: white;
+    }
+    .plan-card.featured {
+      border-color: var(--federal);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.1);
+    }
+    .plan-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .plan-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-recommended { background: var(--federal); color: white; }
+    .badge-federal { background: #dbeafe; color: var(--federal); }
+    .badge-state { background: #d1fae5; color: var(--state); }
+    .badge-private { background: #fee2e2; color: var(--private); }
+    
+    .plan-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin: 16px 0;
+      padding: 16px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+    .stat {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    
+    .mix-bar {
+      display: flex;
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .mix-federal { background: var(--federal); }
+    .mix-state { background: var(--state); }
+    .mix-private { background: var(--private); }
+    
+    .year-breakdown {
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    
+    /* Repayment details styling */
+    .repayment-details {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+    .repayment-details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--federal);
+      padding: 8px 0;
+      user-select: none;
+    }
+    .repayment-details summary:hover {
+      color: #1e3a8a;
+    }
+    .repayment-details[open] summary {
+      margin-bottom: 8px;
+    }
+    .repayment-details table {
+      font-size: 0.875rem;
+    }
+    .repayment-details th, 
+    .repayment-details td {
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: middle;
+    }
+    .year-row {
+      display: grid;
+      grid-template-columns: 100px 1fr 120px;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      background: #f8fafc;
+    }
+    .year-label {
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .year-segments {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .segment-chip {
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .segment-chip.federal { background: #dbeafe; color: var(--federal); }
+    .segment-chip.state { background: #d1fae5; color: var(--state); }
+    .segment-chip.private { background: #fee2e2; color: var(--private); }
+    
+    .gap-check {
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      margin-top: 12px;
+    }
+    .gap-ok { background: #d1fae5; color: var(--state); }
+    .gap-warn { background: #fef3c7; color: #92400e; }
+    
+    .muted { color: var(--muted); font-size: 0.875rem; }
+    
+    details {
+      margin-top: 12px;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--federal);
+    }
+    
+    .explanation {
+      background: #f0f9ff;
+      border-left: 4px solid var(--federal);
+      padding: 12px 16px;
+      margin: 12px 0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎓 Student Loan Optimizer</h1>
+      <p class="subtitle">Get a personalized, year-by-year loan plan optimized for your financial future.</p>
+      
+      <!-- Loan Catalog -->
+      <details>
+        <summary>View all loan options (federal, state, private)</summary>
+        <div style="margin-top: 12px; overflow-x: auto;">
+          <table class="catalog-table">
+            <thead>
+              <tr>
+                <th>Loan Type</th>
+                <th>Category</th>
+                <th>Interest Rate</th>
+                <th>Origination Fee</th>
+                <th>Annual Limit</th>
+                <th>Key Features</th>
+              </tr>
+            </thead>
+            <tbody id="catalog-body"></tbody>
+          </table>
+        </div>
+      </details>
+    </div>
+    
+    <!-- Input Form -->
+    <div class="card">
+      <h2>📝 Your Information</h2>
+      <form id="loan-form">
+        <div class="form-grid">
+          <!-- Student Profile -->
+          <div class="form-group">
+            <label>Current Year Level <span class="required">*</span></label>
+            <select name="yearLevel" required>
+              <option value="freshman">Freshman (4 years left)</option>
+              <option value="sophomore">Sophomore (3 years left)</option>
+              <option value="junior">Junior (2 years left)</option>
+              <option value="senior">Senior (1 year left)</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>School Name <span class="required">*</span></label>
+            <input type="text" name="school" placeholder="e.g., Duke University" required />
+          </div>
+          
+          <div class="form-group">
+            <label>State of Residence <span class="required">*</span></label>
+            <select name="stateOfResidence" required>
+              <option value="NC">North Carolina</option>
+              <option value="CA">California</option>
+              <option value="NY">New York</option>
+              <option value="TX">Texas</option>
+              <option value="other">Other State</option>
+            </select>
+            <small>Affects state loan eligibility</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Dependency Status <span class="required">*</span></label>
+            <select name="dependencyStatus" required>
+              <option value="dependent">Dependent (under 24, no dependents)</option>
+              <option value="independent">Independent</option>
+            </select>
+            <small>Affects federal loan limits</small>
+          </div>
+          
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="eligibleForSubsidized" checked style="width: 18px; height: 18px;" />
+              Eligible for Subsidized Loans
+            </label>
+            <small>Uncheck if you don't qualify (based on FAFSA financial need)</small>
+          </div>
+          
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+              <input type="checkbox" name="eligibleForFELS" style="width: 18px; height: 18px;" />
+              Eligible for NC FELS
+            </label>
+            <small>NC residents in teaching, nursing, allied health, or other qualifying fields</small>
+          </div>
+          
+          <!-- Financial -->
+          <div class="form-group">
+            <label>Annual Funding Gap (COA - Aid) <span class="required">*</span></label>
+            <input type="number" name="annualGap" placeholder="25000" required />
+            <small>Amount you need to borrow per year</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Expected Starting Salary <span class="required">*</span></label>
+            <input type="number" name="annualIncome" placeholder="60000" required />
+            <small>For IDR payment calculations</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Family Size</label>
+            <input type="number" name="familySize" value="1" min="1" />
+            <small>For IDR calculations</small>
+          </div>
+          
+          <!-- Credit & Preferences -->
+          <div class="form-group">
+            <label>Credit Score Range <span class="required">*</span></label>
+            <select name="creditScoreRange" required>
+              <option value="poor">Poor (< 580)</option>
+              <option value="fair" selected>Fair (580-669)</option>
+              <option value="good">Good (670-739)</option>
+              <option value="excellent">Excellent (740+)</option>
+            </select>
+            <small>Affects private loan rates</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Have a Cosigner? <span class="required">*</span></label>
+            <select name="cosigner" required>
+              <option value="false">No</option>
+              <option value="true">Yes</option>
+            </select>
+            <small>Can lower private loan rates</small>
+          </div>
+          
+          <div class="form-group">
+            <label>In-School Payment Preference</label>
+            <select name="inSchoolPayment">
+              <option value="defer">Full Deferment (no payments)</option>
+              <option value="interest-only">Interest Only</option>
+              <option value="fixed-25">Fixed $25/month</option>
+              <option value="full">Full Payments</option>
+            </select>
+            <small>Affects total interest</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Tuition Growth Rate</label>
+            <input type="number" step="0.1" name="tuitionGrowthRate" value="7" />
+            <small>Expected % increase per year</small>
+          </div>
+        </div>
+        
+        <!-- Repayment Constraint Section -->
+        <div style="margin-top: 20px; padding: 16px; background: #fef3c7; border-radius: 8px; border: 1px solid #f59e0b;">
+          <h3 style="margin: 0 0 12px; color: #92400e;">⚡ Repayment Goal <span class="required">*</span></h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Optimize By <span class="required">*</span></label>
+              <select name="constraintMode" id="constraintMode" required>
+                <option value="payoff-years" selected>Target Payoff Years</option>
+                <option value="max-payment">Max Monthly Payment</option>
+              </select>
+              <small>Choose how to constrain your repayment plan</small>
+            </div>
+            
+            <div class="form-group" id="payoffYearsGroup">
+              <label>Payoff In <span class="required">*</span></label>
+              <select name="targetPayoffYears" id="targetPayoffYears" required>
+                <option value="5">5 years (aggressive - less interest)</option>
+                <option value="7">7 years</option>
+                <option value="10" selected>10 years (standard)</option>
+                <option value="15">15 years</option>
+                <option value="20">20 years (lowest payment)</option>
+              </select>
+              <small>Shorter = higher payments, less interest</small>
+            </div>
+            
+            <div class="form-group" id="maxPaymentGroup" style="display: none;">
+              <label>Max Monthly Payment <span class="required">*</span></label>
+              <input type="number" name="maxMonthlyPayment" id="maxMonthlyPayment" placeholder="e.g., 500" />
+              <small>We'll find the shortest term that fits this budget</small>
+            </div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-primary" id="submit-btn">Generate Optimized Plan</button>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Results -->
+    <div id="status" class="muted"></div>
+    <div id="results" class="results"></div>
+    
+    <!-- Methodology -->
+    <div class="card" style="margin-top: 24px;">
+      <details>
+        <summary>How we optimize your loan plan</summary>
+        <div class="explanation" style="margin-top: 12px;">
+          <strong>Our Strategy: Federal First</strong>
+          <ol>
+            <li><strong>Direct Subsidized</strong> — Best option! Government pays interest while in school.</li>
+            <li><strong>Direct Unsubsidized</strong> — Same low federal rate, but interest accrues.</li>
+            <li><strong>State Loans</strong> — NC Assist, FELS, etc. Often competitive rates with forgiveness options.</li>
+            <li><strong>Private Loans</strong> — Only to fill remaining gap. Higher rates, fewer protections.</li>
+          </ol>
+          <p>This hierarchy minimizes your long-term cost because federal loans have:</p>
+          <ul>
+            <li>Lower, fixed interest rates (currently 6.53% for undergrads)</li>
+            <li>Income-driven repayment options (SAVE plan = 5% of discretionary income)</li>
+            <li>Loan forgiveness after 20-25 years on IDR plans</li>
+            <li>Deferment and forbearance protections</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://localhost:4000/api/optimize";
+    const form = document.getElementById("loan-form");
+    const statusEl = document.getElementById("status");
+    const resultsEl = document.getElementById("results");
+    
+    // Populate loan catalog - Updated rates from official sources
+    // Federal: https://studentaid.gov/understand-aid/types/loans
+    // NC Assist: https://www.cfnc.org/pay-for-college/nc-assist-loans/
+    const CATALOG = [
+      { name: "Direct Subsidized", category: "Federal", type: "federal", rate: "6.53% fixed", fee: "1.057%", limit: "$3,500-$5,500/yr", features: "No interest while in school, IDR eligible" },
+      { name: "Direct Unsubsidized", category: "Federal", type: "federal", rate: "6.53% fixed", fee: "1.057%", limit: "$5,500-$12,500/yr total", features: "Interest accrues in school, IDR eligible" },
+      { name: "Parent PLUS", category: "Federal", type: "federal", rate: "9.08% fixed", fee: "4.228%", limit: "Up to COA", features: "Parent borrows, credit check required" },
+      { name: "NC Student Assist", category: "State (NC)", type: "state", rate: "7.75% (7.50% w/autopay)", fee: "None", limit: "Up to COA", features: "NC residents, $120k lifetime limit" },
+      { name: "NC Parent Assist", category: "State (NC)", type: "state", rate: "6.95% (6.70% w/autopay)", fee: "None", limit: "Up to COA", features: "Lower rate than federal PLUS, no fees" },
+      { name: "NC FELS", category: "State (NC)", type: "state", rate: "0% (forgivable)", fee: "None", limit: "$8,500/yr", features: "Forgiven if work in NC (teaching, nursing, etc.)" },
+      { name: "Sallie Mae", category: "Private", type: "private", rate: "4.99-16.99%", fee: "None", limit: "Up to COA", features: "1% graduation reward" },
+      { name: "SoFi", category: "Private", type: "private", rate: "4.99-17.49%", fee: "None", limit: "Up to COA", features: "Career services, member benefits" },
+      { name: "College Ave", category: "Private", type: "private", rate: "4.99-17.99%", fee: "None", limit: "Up to COA", features: "Flexible terms, multi-year approval" },
+      { name: "Discover", category: "Private", type: "private", rate: "5.49-16.99%", fee: "None", limit: "Up to COA", features: "1% good grades reward each year" },
+      { name: "Earnest", category: "Private", type: "private", rate: "4.89-17.49%", fee: "None", limit: "Up to COA", features: "Skip payment once/year, precision pricing" }
+    ];
+    
+    const catalogBody = document.getElementById("catalog-body");
+    catalogBody.innerHTML = CATALOG.map(l => `
+      <tr class="type-${l.type}">
+        <td><strong>${l.name}</strong></td>
+        <td>${l.category}</td>
+        <td>${l.rate}</td>
+        <td>${l.fee}</td>
+        <td>${l.limit}</td>
+        <td>${l.features}</td>
+      </tr>
+    `).join("");
+    
+    // Toggle between payoff years and max payment constraint modes
+    const constraintMode = document.getElementById("constraintMode");
+    const payoffYearsGroup = document.getElementById("payoffYearsGroup");
+    const maxPaymentGroup = document.getElementById("maxPaymentGroup");
+    const targetPayoffYears = document.getElementById("targetPayoffYears");
+    const maxMonthlyPayment = document.getElementById("maxMonthlyPayment");
+    
+    constraintMode.addEventListener("change", () => {
+      if (constraintMode.value === "payoff-years") {
+        payoffYearsGroup.style.display = "flex";
+        maxPaymentGroup.style.display = "none";
+        targetPayoffYears.required = true;
+        maxMonthlyPayment.required = false;
+        maxMonthlyPayment.value = "";
+      } else {
+        payoffYearsGroup.style.display = "none";
+        maxPaymentGroup.style.display = "flex";
+        targetPayoffYears.required = false;
+        maxMonthlyPayment.required = true;
+      }
+    });
+    
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("submit-btn");
+      btn.disabled = true;
+      statusEl.textContent = "Calculating your optimized plan...";
+      resultsEl.innerHTML = "";
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      
+      // Convert types
+      data.annualGap = Number(data.annualGap);
+      data.annualIncome = Number(data.annualIncome);
+      data.familySize = Number(data.familySize) || 1;
+      data.cosigner = data.cosigner === "true";
+      // Checkboxes - if unchecked, they won't be in formData, so we check explicitly
+      data.eligibleForSubsidized = form.querySelector('[name="eligibleForSubsidized"]').checked;
+      data.eligibleForFELS = form.querySelector('[name="eligibleForFELS"]').checked;
+      // Handle tuition growth rate - use 7% default only if field is empty/undefined
+      const tuitionInput = data.tuitionGrowthRate;
+      data.tuitionGrowthRate = (tuitionInput === "" || tuitionInput === undefined || tuitionInput === null) 
+        ? 0.07 
+        : Number(tuitionInput) / 100;
+      
+      // Payoff constraints - based on selected mode
+      data.constraintMode = data.constraintMode;
+      if (data.constraintMode === "payoff-years") {
+        data.targetPayoffYears = Number(data.targetPayoffYears) || 10;
+        data.maxMonthlyPayment = null;
+      } else {
+        data.targetPayoffYears = null;
+        data.maxMonthlyPayment = Number(data.maxMonthlyPayment) || 500;
+      }
+      
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        
+        if (!res.ok) throw new Error("API error");
+        const json = await res.json();
+        renderResults(json, data);
+        statusEl.textContent = "";
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Error: Is the backend running on localhost:4000?";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+    
+    // Helper function to render loan breakdown rows
+    function renderLoanRows(yearPlan, summary) {
+      const segments = yearPlan.flatMap(y => y.segments);
+      let rows = segments.map(seg => {
+        const r = seg.rate / 12;
+        const n = seg.termYears * 12;
+        const monthlyPayment = r > 0 ? seg.amount * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1) : seg.amount / n;
+        return `
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px;">
+              <span class="segment-chip ${seg.type}" style="display: inline-block;">${seg.name}</span>
+            </td>
+            <td style="padding: 8px; text-align: right;">$${seg.amount.toLocaleString()}</td>
+            <td style="padding: 8px; text-align: right;">${(seg.rate * 100).toFixed(2)}%</td>
+            <td style="padding: 8px; text-align: right;">${seg.termYears} yrs</td>
+            <td style="padding: 8px; text-align: right; font-weight: 600;">$${Math.round(monthlyPayment).toLocaleString()}</td>
+          </tr>
+        `;
+      }).join("");
+      
+      // Add total row
+      rows += `
+        <tr style="background: #f1f5f9; font-weight: 700;">
+          <td style="padding: 8px;">TOTAL</td>
+          <td style="padding: 8px; text-align: right;">$${summary.totalPrincipal.toLocaleString()}</td>
+          <td style="padding: 8px; text-align: right;">${summary.weightedRate}%</td>
+          <td style="padding: 8px; text-align: right;">${summary.payoffYears} yrs</td>
+          <td style="padding: 8px; text-align: right;">$${summary.standardPayment.toLocaleString()}</td>
+        </tr>
+      `;
+      return rows;
+    }
+    
+    // Helper function to render in-school payment section
+    function renderInSchoolSection(summary, inputData) {
+      const mode = summary.inSchoolPaymentMode || inputData.inSchoolPayment || 'defer';
+      const modeLabels = {
+        'defer': 'Full Deferment (no payments)',
+        'interest-only': 'Interest-Only Payments',
+        'fixed-25': 'Fixed $25/month',
+        'full': 'Full Payments'
+      };
+      const modeLabel = modeLabels[mode] || mode;
+      
+      const monthlyPayment = summary.inSchoolMonthlyPayment || 0;
+      const totalPaid = summary.inSchoolTotalPaid || 0;
+      const accruedInterest = summary.accruedInterest || 0;
+      const yearsInSchool = summary.yearsInSchool || 0;
+      
+      // Different styling based on whether they're making payments
+      const isPayingInSchool = monthlyPayment > 0;
+      
+      return `
+        <div style="padding: 16px; background: linear-gradient(135deg, ${isPayingInSchool ? '#d1fae5, #ecfdf5' : '#fef3c7, #fffbeb'}); border-radius: 12px; margin-bottom: 16px; border-left: 4px solid ${isPayingInSchool ? '#10b981' : '#f59e0b'};">
+          <h4 style="margin: 0 0 12px; color: ${isPayingInSchool ? '#047857' : '#92400e'};">
+            🎓 While In School (${yearsInSchool} years)
+          </h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+            <div>
+              <div style="font-size: 0.875rem; font-weight: 600; color: ${isPayingInSchool ? '#047857' : '#92400e'};">${modeLabel}</div>
+              <div style="font-size: 0.75rem; color: #64748b;">Payment Strategy</div>
+            </div>
+            <div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: ${isPayingInSchool ? '#047857' : '#92400e'};">$${monthlyPayment.toLocaleString()}/mo</div>
+              <div style="font-size: 0.75rem; color: #64748b;">Monthly While in School</div>
+            </div>
+            <div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: ${isPayingInSchool ? '#059669' : '#b45309'};">$${totalPaid.toLocaleString()}</div>
+              <div style="font-size: 0.75rem; color: #64748b;">Paid During School</div>
+            </div>
+            <div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: ${accruedInterest > 0 ? '#dc2626' : '#059669'};">
+                ${accruedInterest > 0 ? '+$' + accruedInterest.toLocaleString() : '$0'}
+              </div>
+              <div style="font-size: 0.75rem; color: #64748b;">Interest Capitalized</div>
+            </div>
+          </div>
+          ${accruedInterest > 0 ? `
+            <p style="margin: 12px 0 0; padding: 8px; background: rgba(220, 38, 38, 0.1); border-radius: 6px; font-size: 0.75rem; color: #991b1b;">
+              ⚠️ <strong>$${accruedInterest.toLocaleString()}</strong> in unpaid interest will be added to your principal at graduation, increasing your total debt.
+            </p>
+          ` : `
+            <p style="margin: 12px 0 0; padding: 8px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; font-size: 0.75rem; color: #047857;">
+              ✓ ${mode === 'defer' && summary.totalFederal > 0 ? 'Subsidized loans have no in-school interest. ' : ''}No interest will capitalize on your loans.
+            </p>
+          `}
+        </div>
+      `;
+    }
+    
+    // Helper function to render IDR section (only if federal loans exist)
+    function renderIdrSection(summary, inputData) {
+      if (summary.totalFederal <= 0) return '';
+      return `
+        <div style="padding: 16px; background: linear-gradient(135deg, #fef3c7, #fffbeb); border-radius: 12px; border-left: 4px solid #f59e0b; margin-bottom: 16px;">
+          <h4 style="margin: 0 0 8px; color: #92400e;">🎓 Income-Driven Repayment (IDR) Option</h4>
+          <p style="margin: 0 0 8px; font-size: 0.875rem; color: #78350f;">
+            For your <strong>$${summary.totalFederal.toLocaleString()}</strong> in federal loans, you may qualify for IDR:
+          </p>
+          <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+            <div>
+              <div style="font-size: 1.25rem; font-weight: 700; color: #92400e;">$${summary.idrPayment.toLocaleString()}/mo</div>
+              <div style="font-size: 0.75rem; color: #a16207;">SAVE Plan (5% of discretionary income)</div>
+            </div>
+            <div style="font-size: 0.75rem; color: #78350f; max-width: 300px;">
+              Based on $${inputData.annualIncome.toLocaleString()} income, family size ${inputData.familySize}.<br>
+              Remaining balance forgiven after 20-25 years.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    
+    function renderResults(resp, inputData) {
+      const { featured, options, requestedGap, totalYears } = resp;
+      
+      resultsEl.innerHTML = `
+        <h2>📊 Your Personalized Loan Plans</h2>
+        <p class="muted">Based on ${totalYears} years remaining, with $${requestedGap.toLocaleString()} total funding needed.</p>
+      `;
+      
+      // Render each plan
+      options.forEach((plan, idx) => {
+        const isFeatured = idx < 2;
+        const { summary, yearPlan, label, description } = plan;
+        
+        // Calculate total funded
+        const totalFunded = yearPlan.reduce((sum, y) => sum + y.funded, 0);
+        const gapMatch = Math.abs(totalFunded - requestedGap) < 100;
+        
+        const cardHtml = `
+          <div class="plan-card ${isFeatured ? 'featured' : ''}">
+            <div class="plan-header">
+              <div>
+                ${isFeatured ? '<span class="badge badge-recommended">Recommended</span>' : ''}
+                <div class="plan-title">${label}</div>
+                <div class="muted">${description}</div>
+              </div>
+            </div>
+            
+            <div class="plan-stats">
+              <div class="stat">
+                <div class="stat-value">$${summary.standardPayment.toLocaleString()}</div>
+                <div class="stat-label">Monthly Payment</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">$${summary.totalCost.toLocaleString()}</div>
+                <div class="stat-label">Total Cost</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">$${summary.totalInterest.toLocaleString()}</div>
+                <div class="stat-label">Total Interest</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">${summary.payoffYears || 10} yrs</div>
+                <div class="stat-label">Repayment Term</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">${summary.payoffYear}</div>
+                <div class="stat-label">Paid Off By</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">${summary.weightedRate}%</div>
+                <div class="stat-label">Avg Rate</div>
+              </div>
+            </div>
+            
+            <!-- Loan Mix Bar -->
+            <div style="margin-bottom: 8px;">
+              <strong>Loan Mix:</strong>
+              <span class="badge badge-federal">Federal ${summary.federalPct}%</span>
+              <span class="badge badge-state">State ${summary.statePct}%</span>
+              <span class="badge badge-private">Private ${summary.privatePct}%</span>
+            </div>
+            <div class="mix-bar">
+              <div class="mix-federal" style="width: ${summary.federalPct}%"></div>
+              <div class="mix-state" style="width: ${summary.statePct}%"></div>
+              <div class="mix-private" style="width: ${summary.privatePct}%"></div>
+            </div>
+            
+            <!-- Gap Check -->
+            <div class="gap-check ${gapMatch ? 'gap-ok' : 'gap-warn'}">
+              ${gapMatch 
+                ? `✓ Full funding: $${totalFunded.toLocaleString()} covers your $${requestedGap.toLocaleString()} need` 
+                : `⚠ Funded $${totalFunded.toLocaleString()} of $${requestedGap.toLocaleString()} requested`}
+            </div>
+            
+            <!-- Year-by-Year Breakdown -->
+            <details class="year-breakdown">
+              <summary>View year-by-year breakdown</summary>
+              <div style="margin-top: 12px;">
+                ${yearPlan.map(year => `
+                  <div class="year-row">
+                    <div class="year-label">Year ${year.year}<br><span class="muted">${year.yearLevel}</span></div>
+                    <div class="year-segments">
+                      ${year.segments.map(seg => `
+                        <span class="segment-chip ${seg.type}">
+                          ${seg.name}: $${seg.amount.toLocaleString()} @ ${(seg.rate * 100).toFixed(2)}% (${seg.termYears}yr)
+                        </span>
+                      `).join("")}
+                    </div>
+                    <div style="text-align: right;">
+                      <strong>$${year.funded.toLocaleString()}</strong>
+                      ${year.uncovered > 0 ? `<br><span style="color: var(--private)">$${year.uncovered.toLocaleString()} uncovered</span>` : ''}
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            </details>
+            
+            <!-- Repayment Details -->
+            <details class="repayment-details" style="margin-top: 12px;">
+              <summary>📋 View Full Repayment Details</summary>
+              <div style="margin-top: 12px;">
+                
+                <!-- In-School Payment Section -->
+                ${renderInSchoolSection(summary, inputData)}
+                
+                <!-- Post-Graduation Repayment Summary -->
+                <div style="padding: 16px; background: linear-gradient(135deg, #e0f2fe, #f0f9ff); border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #0ea5e9;">
+                  <h4 style="margin: 0 0 12px; color: #0369a1;">💰 After Graduation: ${summary.payoffYears}-Year Repayment</h4>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                    <div>
+                      <div style="font-size: 1.5rem; font-weight: 700; color: #0369a1;">$${summary.standardPayment.toLocaleString()}</div>
+                      <div style="font-size: 0.875rem; color: #64748b;">Monthly Payment</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.5rem; font-weight: 700; color: #059669;">$${summary.totalPrincipal.toLocaleString()}</div>
+                      <div style="font-size: 0.875rem; color: #64748b;">Principal Borrowed</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.5rem; font-weight: 700; color: #dc2626;">$${summary.totalInterest.toLocaleString()}</div>
+                      <div style="font-size: 0.875rem; color: #64748b;">Total Interest</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 1.5rem; font-weight: 700; color: #7c3aed;">$${summary.totalCost.toLocaleString()}</div>
+                      <div style="font-size: 0.875rem; color: #64748b;">Total Cost</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Loan-by-Loan Breakdown -->
+                <div style="padding: 16px; background: #f8fafc; border-radius: 12px; margin-bottom: 16px;">
+                  <h4 style="margin: 0 0 12px; color: #334155;">📊 Individual Loan Breakdown</h4>
+                  <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                    <thead>
+                      <tr style="background: #e2e8f0;">
+                        <th style="padding: 8px; text-align: left; border-radius: 6px 0 0 0;">Loan</th>
+                        <th style="padding: 8px; text-align: right;">Principal</th>
+                        <th style="padding: 8px; text-align: right;">Rate</th>
+                        <th style="padding: 8px; text-align: right;">Term</th>
+                        <th style="padding: 8px; text-align: right; border-radius: 0 6px 0 0;">Monthly</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${renderLoanRows(yearPlan, summary)}
+                    </tbody>
+                  </table>
+                </div>
+                
+                ${renderIdrSection(summary, inputData)}
+                
+                <!-- Timeline -->
+                <div style="margin-top: 16px; padding: 16px; background: #f8fafc; border-radius: 12px;">
+                  <h4 style="margin: 0 0 8px; color: #334155;">📅 Complete Payment Timeline</h4>
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <div style="background: #f59e0b; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.875rem;">
+                      Now: In School
+                    </div>
+                    <div style="flex: 0.3; height: 4px; background: #f59e0b; min-width: 30px; border-radius: 2px;"></div>
+                    <div style="background: #10b981; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.875rem;">
+                      Graduate: ${new Date().getFullYear() + totalYears}
+                    </div>
+                    <div style="flex: 1; height: 4px; background: linear-gradient(to right, #10b981, #6366f1); min-width: 50px; border-radius: 2px;"></div>
+                    <div style="background: #6366f1; color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.875rem;">
+                      Debt-Free: ${summary.payoffYear}
+                    </div>
+                  </div>
+                  <p style="margin: 0; font-size: 0.75rem; color: #64748b;">
+                    <strong>In School (${summary.yearsInSchool || totalYears} yrs):</strong> $${(summary.inSchoolMonthlyPayment || 0).toLocaleString()}/mo × ${(summary.yearsInSchool || totalYears) * 12} months = $${(summary.inSchoolTotalPaid || 0).toLocaleString()}<br>
+                    <strong>After Graduation (${summary.payoffYears} yrs):</strong> $${summary.standardPayment.toLocaleString()}/mo × ${summary.payoffYears * 12} months = $${(summary.standardPayment * summary.payoffYears * 12).toLocaleString()}
+                  </p>
+                </div>
+                
+              </div>
+            </details>
+          </div>
+        `;
+        
+        resultsEl.innerHTML += cardHtml;
+      });
+    }
+    
+    function fmt(num) {
+      return (num || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+  </script>
+</body>
+</html>
