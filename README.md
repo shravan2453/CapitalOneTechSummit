@@ -151,8 +151,6 @@ The application uses Supabase with two main tables:
 - **users** - User profiles with financial information and preferences
 - **loans** - User's personal loan records
 
-See the database migrations or schema documentation for detailed field descriptions.
-
 ## License
 
 See LICENSE file for details.
