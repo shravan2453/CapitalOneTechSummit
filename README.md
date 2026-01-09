@@ -2,7 +2,7 @@
 
 A React web application that helps students compare loan options, calculate repayment scenarios, and optimize their loan strategy based on their personal financial situation.
 
-## Features
+## Feature Overview
 
 - **Dashboard** - Overview of financial metrics, loan balances, and payoff trajectory
 - **Loan Comparison** - Compare federal, private, and state loan options side-by-side with detailed scenarios
@@ -103,7 +103,7 @@ Open your browser and navigate to `http://localhost:5173`
 └── package.json           # Dependencies and scripts
 ```
 
-## Key Features
+## Feature Descriptions
 
 ### Loan Comparison
 - Compare multiple loan scenarios side-by-side
