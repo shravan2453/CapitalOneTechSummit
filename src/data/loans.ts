@@ -1,4 +1,5 @@
 // Loan Database - Federal, Private, and State Loans
+import { federal as federalProducts, state as stateProducts, privateLoans as privateProducts } from './loanProducts';
 
 export interface Loan {
   id: string;
@@ -21,118 +22,152 @@ export interface Loan {
   features: string[];
 }
 
-export const federalLoans: Loan[] = [
-  {
-    id: 'direct-subsidized',
-    name: 'Direct Subsidized',
-    type: 'federal',
-    category: 'Undergraduate',
-    interestRate: { fixed: 5.50 },
-    originationFee: 1.057,
-    loanLimit: { annual: 5500, total: 23000 },
-    gracePeriod: 6,
-    repaymentOptions: ['Standard', 'Graduated', 'Extended', 'Income-Driven'],
-    eligibility: ['Undergraduate', 'Financial Need'],
-    features: ['Interest paid by government while in school', 'No credit check']
-  },
-  {
-    id: 'direct-unsubsidized',
-    name: 'Direct Unsubsidized',
-    type: 'federal',
-    category: 'All Students',
-    interestRate: { fixed: 5.50 },
-    originationFee: 1.057,
-    loanLimit: { annual: 20000, total: 138000 },
-    gracePeriod: 6,
-    repaymentOptions: ['Standard', 'Graduated', 'Extended', 'Income-Driven'],
-    eligibility: ['All Students'],
-    features: ['No financial need requirement', 'Interest accrues immediately']
-  },
-  {
-    id: 'direct-plus',
-    name: 'Direct PLUS',
-    type: 'federal',
-    category: 'Graduate/Professional',
-    interestRate: { fixed: 8.05 },
-    originationFee: 4.228,
-    loanLimit: { annual: 0, total: 0 }, // Cost of attendance minus other aid
-    gracePeriod: 6,
-    repaymentOptions: ['Standard', 'Graduated', 'Extended', 'Income-Contingent'],
-    eligibility: ['Graduate/Professional', 'Credit check required'],
-    features: ['Covers cost of attendance', 'Higher interest rate']
-  },
-  {
-    id: 'perkins',
-    name: 'Perkins Loan',
-    type: 'federal',
-    category: 'Undergraduate/Graduate',
-    interestRate: { fixed: 5.00 },
-    originationFee: 0,
-    loanLimit: { annual: 5500, total: 27500 },
-    gracePeriod: 9,
-    repaymentOptions: ['Standard', 'Extended'],
-    eligibility: ['Exceptional Financial Need', 'School-specific'],
-    features: ['Lowest federal rate', 'School-administered']
+// Transform federal loans from loanProducts.js
+export const federalLoans: Loan[] = federalProducts.map((loan: any) => {
+  const maxAnnualLimit = loan.annual_limit_by_year_dep 
+    ? Math.max(...Object.values(loan.annual_limit_by_year_dep) as number[])
+    : loan.annual_limit_by_year_indep
+    ? Math.max(...Object.values(loan.annual_limit_by_year_indep) as number[])
+    : undefined;
+  
+  const maxAggLimit = loan.agg_limit_dep || loan.agg_limit_indep || undefined;
+  
+  const features: string[] = [];
+  if (loan.subsidized) {
+    features.push('Interest paid by government while in school');
+  } else {
+    features.push('Interest accrues immediately');
   }
-];
+  if (!loan.requires_credit_check) {
+    features.push('No credit check');
+  }
+  if (loan.note) {
+    features.push(loan.note);
+  }
 
-export const privateLoans: Loan[] = [
-  {
-    id: 'sallie-mae',
-    name: 'Sallie Mae',
-    type: 'private',
-    category: 'Undergraduate',
-    interestRate: { range: { min: 4.50, max: 12.35 } },
-    originationFee: 0,
-    loanLimit: { annual: 0, total: 0 }, // School-certified amount
-    gracePeriod: 6,
-    repaymentOptions: ['Fixed', 'Variable', 'Interest-Only', 'Deferred'],
-    eligibility: ['Credit check', 'Cosigner may be required'],
-    features: ['Competitive rates', 'Multiple repayment options']
-  },
-  {
-    id: 'discover',
-    name: 'Discover Student Loans',
-    type: 'private',
-    category: 'All Students',
-    interestRate: { range: { min: 4.99, max: 13.49 } },
-    originationFee: 0,
-    loanLimit: { annual: 0, total: 0 },
-    gracePeriod: 6,
-    repaymentOptions: ['Fixed', 'Variable', 'Interest-Only', 'Deferred'],
-    eligibility: ['Credit check', 'Cosigner options available'],
-    features: ['No fees', 'Rewards for good grades']
-  },
-  {
-    id: 'citizens',
-    name: 'Citizens Bank',
-    type: 'private',
-    category: 'All Students',
-    interestRate: { range: { min: 4.24, max: 12.18 } },
-    originationFee: 0,
-    loanLimit: { annual: 0, total: 0 },
-    gracePeriod: 6,
-    repaymentOptions: ['Fixed', 'Variable', 'Interest-Only'],
-    eligibility: ['Credit check', 'Cosigner may be required'],
-    features: ['Multi-year approval', 'Loyalty discounts']
+  const eligibility: string[] = [];
+  if (loan.subsidized) {
+    eligibility.push('Financial Need Required');
+  } else {
+    eligibility.push('All Students');
   }
-];
+  if (loan.requires_credit_check) {
+    eligibility.push('Credit check required');
+  }
 
-export const stateLoans: Loan[] = [
-  {
-    id: 'cfnc',
-    name: 'CFNC (College Foundation of North Carolina)',
-    type: 'state',
-    category: 'North Carolina Residents',
-    interestRate: { fixed: 4.99 },
-    originationFee: 0,
-    loanLimit: { annual: 0, total: 0 },
-    gracePeriod: 6,
-    repaymentOptions: ['Standard', 'Extended', 'Income-Based'],
-    eligibility: ['NC Resident', 'NC School'],
-    features: ['State-specific benefits', 'Lower rates for residents']
+  return {
+    id: loan.id,
+    name: loan.name,
+    type: loan.type,
+    category: loan.subsidized ? 'Undergraduate' : loan.id === 'parent-plus' ? 'Parent' : 'All Students',
+    interestRate: { fixed: loan.fixed_rate ? loan.fixed_rate * 100 : undefined },
+    originationFee: loan.orig_fee ? loan.orig_fee * 100 : 0,
+    loanLimit: {
+      annual: maxAnnualLimit,
+      total: maxAggLimit
+    },
+    gracePeriod: loan.grace_period_months,
+    repaymentOptions: loan.repayment_plans?.map((p: string) => p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, ' ')) || [],
+    eligibility,
+    features
+  };
+});
+
+// Transform state loans from loanProducts.ts
+export const stateLoans: Loan[] = stateProducts.map((loan: any) => {
+  const features: string[] = [];
+  if (loan.orig_fee === 0) {
+    features.push('No origination fees');
   }
-];
+  if (loan.autopay_discount) {
+    features.push(`${(loan.autopay_discount * 100).toFixed(2)}% autopay discount`);
+  }
+  if (loan.note) {
+    features.push(loan.note);
+  }
+  if (loan.forgiveness) {
+    features.push(loan.forgiveness_note || 'Eligible for forgiveness');
+  }
+
+  const eligibility: string[] = [];
+  if (loan.state_required) {
+    eligibility.push(`${loan.state_required} Resident`);
+  }
+  if (loan.eligibility) {
+    eligibility.push(loan.eligibility);
+  }
+
+  return {
+    id: loan.id,
+    name: loan.name,
+    type: loan.type,
+    category: loan.state_required ? `${loan.state_required} Residents` : 'State-Specific',
+    interestRate: { fixed: loan.fixed_rate ? loan.fixed_rate * 100 : undefined },
+    originationFee: loan.orig_fee ? loan.orig_fee * 100 : 0,
+    loanLimit: {
+      annual: loan.annual_limit || undefined,
+      total: loan.agg_limit || undefined
+    },
+    gracePeriod: loan.grace_period_months,
+    repaymentOptions: loan.repayment_plans?.map((p: string) => p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, ' ')) || [],
+    eligibility,
+    features
+  };
+});
+
+// Transform private loans from loanProducts.js
+export const privateLoans: Loan[] = privateProducts.map((loan: any) => {
+  // Calculate min and max rates from credit tiers
+  let minRate = Infinity;
+  let maxRate = -Infinity;
+  
+  if (loan.apr_range_by_credit) {
+    Object.values(loan.apr_range_by_credit).forEach((range: any) => {
+      if (Array.isArray(range) && range.length === 2) {
+        minRate = Math.min(minRate, range[0] * 100);
+        maxRate = Math.max(maxRate, range[1] * 100);
+      }
+    });
+  }
+
+  const features: string[] = [];
+  if (loan.orig_fee === 0) {
+    features.push('No origination fees');
+  }
+  if (loan.autopay_discount) {
+    features.push(`${(loan.autopay_discount * 100).toFixed(2)}% autopay discount`);
+  }
+  if (loan.rewards) {
+    features.push(loan.rewards);
+  }
+  if (loan.perks) {
+    features.push(loan.perks);
+  }
+  if (loan.cosigner_release_years) {
+    features.push(`Cosigner release after ${loan.cosigner_release_years} years`);
+  }
+
+  return {
+    id: loan.id,
+    name: loan.lender || loan.name,
+    type: loan.type,
+    category: 'All Students',
+    interestRate: minRate !== Infinity && maxRate !== -Infinity 
+      ? { range: { min: minRate, max: maxRate } }
+      : {},
+    originationFee: loan.orig_fee ? loan.orig_fee * 100 : 0,
+    loanLimit: {
+      annual: loan.annual_limit || undefined,
+      total: loan.agg_limit || undefined
+    },
+    gracePeriod: loan.grace_period_months || 6,
+    repaymentOptions: loan.in_school_options?.map((opt: string) => 
+      opt.charAt(0).toUpperCase() + opt.slice(1).replace(/-/g, ' ')
+    ) || ['Fixed', 'Variable'],
+    eligibility: ['Credit check', loan.cosigner_release_years ? 'Cosigner options available' : ''],
+    features: features.filter(f => f)
+  };
+});
 
 export const incomeDrivenPlans = [
   {

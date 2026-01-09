@@ -192,6 +192,85 @@ export function calculateScenario(input: ScenarioInput): LoanCalculation {
   };
 }
 
+
+// Calculate weighted average interest rate from loan mix
+
+export function calculateWeightedAverageRate(
+  loanMix: { loanId: string; amount: number }[],
+  loans: Array<{ id: string; interestRate: { fixed?: number; range?: { min: number; max: number } } }>
+): number {
+  if (loanMix.length === 0) return 0;
+  
+  let totalAmount = 0;
+  let weightedSum = 0;
+  
+  loanMix.forEach(({ loanId, amount }) => {
+    const loan = loans.find(l => l.id === loanId);
+    if (!loan) return;
+    
+    let rate = 0;
+    if (loan.interestRate.fixed) {
+      rate = loan.interestRate.fixed;
+    } else if (loan.interestRate.range) {
+      // Use midpoint for range
+      rate = (loan.interestRate.range.min + loan.interestRate.range.max) / 2;
+    }
+    
+    weightedSum += rate * amount;
+    totalAmount += amount;
+  });
+  
+  return totalAmount > 0 ? weightedSum / totalAmount : 0;
+}
+
+// Calculate total loan amount from loan mix (after origination fees)
+
+export function calculateTotalLoanAmount(
+  loanMix: { loanId: string; amount: number }[],
+  loans: Array<{ id: string; originationFee: number }>
+): number {
+  return loanMix.reduce((total, { loanId, amount }) => {
+    const loan = loans.find(l => l.id === loanId);
+    const fee = loan?.originationFee || 0;
+    // Origination fee reduces the amount you receive
+    const netAmount = amount * (1 - fee / 100);
+    return total + netAmount;
+  }, 0);
+}
+
+// Calculate scenario with loan mix (multiple loans)
+
+export interface LoanMixScenarioInput {
+  loanMix: { loanId: string; amount: number }[];
+  loans: Array<{ 
+    id: string; 
+    interestRate: { fixed?: number; range?: { min: number; max: number } };
+    originationFee: number;
+  }>;
+  termYears: number;
+  repaymentStrategy: string;
+  startDate: Date;
+}
+
+export function calculateLoanMixScenario(input: LoanMixScenarioInput): LoanCalculation {
+  const { loanMix, loans, termYears, repaymentStrategy, startDate } = input;
+  
+  // Calculate weighted average interest rate
+  const avgRate = calculateWeightedAverageRate(loanMix, loans);
+  
+  // Calculate total principal (after origination fees)
+  const totalPrincipal = calculateTotalLoanAmount(loanMix, loans);
+  
+  // Use the standard scenario calculation with weighted average rate
+  return calculateScenario({
+    loanAmount: totalPrincipal,
+    interestRate: avgRate,
+    termYears,
+    repaymentStrategy,
+    startDate
+  });
+}
+
 /**
  * Calculate income-driven repayment amount
  */
