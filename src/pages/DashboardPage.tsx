@@ -96,7 +96,6 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ setPage }) => {
       <PageHeader 
         title="Financial Overview" 
         subtitle={`Welcome back${userName ? `, ${userName}` : ''}. Your loan optimization is on track.`}
-        action={<Button variant="primary" icon="download">Download Report</Button>}
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 mb-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
