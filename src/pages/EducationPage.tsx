@@ -1,6 +1,121 @@
 import React, { useState } from 'react';
 import { Card, PageHeader } from '../components/shared';
 import { BookOpen, DollarSign, Target, AlertCircle, GraduationCap, Users, TrendingUp, Calculator, Info } from 'lucide-react';
+import EducationChatbot from '../components/EducationChatbot';
+
+// Education content for the chatbot
+const EDUCATION_CONTENT = `
+Student Loan Education Guide
+
+UNDERSTANDING STUDENT LOANS
+Student loans are a critical tool for financing higher education, but understanding the different types, repayment options, and optimization strategies can be overwhelming.
+
+REQUIRED INFORMATION
+To optimize your loan plan, you'll need to provide:
+- Year Level: Freshman/Sophomore/Junior/Senior - Determines federal annual limits and years remaining
+- School Name: Your university name - Reference only
+- State of Residence: NC, CA, NY, TX, or Other - Determines state loan eligibility
+- Dependency Status: Dependent or Independent - Significantly affects federal limits
+- Eligible for Subsidized: Based on FAFSA financial need - If unchecked, can borrow full limit as unsubsidized
+- Eligible for NC FELS: NC residents in qualifying fields - If checked, includes forgivable FELS loans
+- Annual Funding Gap: COA minus grants/scholarships - The amount to borrow each year
+- Expected Starting Salary: Post-graduation annual income - Used for IDR payment calculations
+- Credit Score Range: Poor (300-579) / Fair (580-669) / Good (670-739) / Excellent (740-850) - Determines private loan APR
+- Have a Cosigner?: Yes/No - Can lower private loan rates by ~0.5-1%
+
+REPAYMENT CONSTRAINTS
+Choose one optimization method:
+- Target Payoff Years: All loans set to closest available term (5, 7, 10, 15, or 20 years). Shorter term = higher monthly payment, less total interest. Longer term = lower monthly payment, more total interest.
+- Max Monthly Payment: System starts with 10-year term. If payment exceeds budget, extends to 15, then 20 years. Finds shortest term that keeps payment under your cap.
+
+IN-SCHOOL PAYMENT OPTIONS
+- Full Deferment: $0 monthly payment. Interest capitalizes (adds to principal). Best for tight budget during school.
+- Interest Only: ~$30-50 per $10k borrowed monthly. No balance growth. Best for moderate budget, want to minimize cost.
+- Fixed $25: $25 flat monthly payment. Partial interest coverage. Compromise option.
+- Full Payment: Full amortization. Actively paying down balance. Best for extra income during school.
+
+Example Impact: For $50,000 in unsubsidized loans at 6.53%, 4 years in school:
+- Defer: $0 in-school cost, ~$14,800 capitalized interest, ~$64,800 balance at graduation
+- Interest Only: ~$13,500 total in-school cost, $0 capitalized interest, $50,000 balance at graduation
+- Fixed $25: ~$1,200 total in-school cost, ~$11,500 capitalized interest, ~$61,500 balance at graduation
+Deferment saves money now but costs ~$5,000+ more over the life of the loan.
+
+TYPES OF STUDENT LOANS
+
+Federal Loans:
+- Direct Subsidized: Annual/aggregate caps by dependency status and year level. Interest subsidized in-school (government pays interest). Fixed rate, origination fee, 6-month grace period. Standard term 10 years, eligible for IDR plans (SAVE/PAYE). Requires financial need (FAFSA).
+- Direct Unsubsidized: Higher caps for independent students. Interest accrues in-school (not subsidized). Same rate/fee/grace period as subsidized. IDR eligible, no financial need required.
+- Parent PLUS / Grad PLUS: Up to remaining cost of attendance. Higher rate and origination fee. Credit check required. Not subsidized, can consolidate for IDR. Deferment options available.
+
+Income-Driven Repayment (IDR) Plans:
+Discretionary income = (income – 225% poverty guideline × household size)
+- SAVE Plan: 5-10% of discretionary income, most generous, interest subsidy
+- PAYE: 10% of discretionary income, never more than standard payment
+- IBR: 10% of discretionary income, capped at standard 10-year payment
+- ICR: 20% of discretionary income or 12-year fixed payment
+Forgiveness after 20-25 years (may be taxable)
+
+State Loans:
+State loan programs vary by state. Examples:
+- NC Assist / FELS (NC): Residency required, program-specific, possible forgivability (FELS)
+- CA CalEdge: California residents, competitive rates
+- NY HESC: New York residents, various term options
+Check your state's program for eligibility, rates, fees, and forgiveness benefits.
+
+Private Loans:
+- APR varies by credit tier and cosigner status
+- Variable vs fixed rate options
+- Term options: 5, 10, 15, or 20 years
+- In-school options: defer, interest-only, fixed partial, immediate repayment
+- Cosigner release terms available
+- Often no origination/prepayment fees
+- Rate discounts: autopay, cosigner, relationship banking
+- Approval based on DTI (debt-to-income) and income
+
+HOW THE OPTIMIZER WORKS
+
+1. Loan Priority Order: The optimizer fills your funding gap in this order (best to worst):
+   - Subsidized Federal Loans - No interest while in school
+   - Unsubsidized Federal Loans - Lower rates, more protections
+   - State Loans - Often competitive rates for residents
+   - Private Loans - Used only if needed to fill remaining gap
+   It respects annual and total loan limits for each type.
+
+2. Multi-Year Planning: If you have multiple years left in school, the optimizer:
+   - Accounts for tuition increases each year (default 7% growth)
+   - Recalculates your funding gap for each remaining year
+   - Plans ahead to ensure you don't exceed aggregate loan limits
+
+3. Interest During School: How your in-school payment choice affects total cost:
+   - Deferment: Interest adds to your loan balance (capitalizes) - costs more long-term
+   - Interest-Only: Prevents balance growth - saves money over time
+   - Fixed $25: Partially covers interest - moderate savings
+   - Subsidized loans: Government pays interest regardless of your choice
+
+4. Finding the Best Plan: The optimizer tries to minimize your total cost while respecting your constraints:
+   - If you set a target payoff year, it finds the shortest term that fits
+   - If you set a max monthly payment, it extends terms until payment fits your budget
+   - It compares standard repayment vs. income-driven plans and shows both options
+   - It warns you if payments might be unaffordable based on your expected income
+
+What You'll See: Each recommended plan shows:
+- Monthly Payment: What you'll pay after graduation
+- Total Cost: Principal + all interest over the loan lifetime
+- Total Interest: How much interest you'll pay in total
+- Payoff Date: When you'll be debt-free
+- Loan Mix: Percentage from federal, state, and private loans
+
+TIPS FOR BEST RESULTS
+1. Be accurate with your funding gap - Include all costs (tuition, housing, books, living expenses) minus all grants/scholarships
+2. Consider your in-school payment carefully - Interest-only payments can save thousands over the loan lifetime
+3. Check subsidized eligibility - If you're unsure, check your FAFSA results or ask your financial aid office
+4. NC residents - If you're in teaching, nursing, allied health, or social work programs, check FELS eligibility
+5. Use a cosigner if available - Can significantly lower private loan rates
+6. Be realistic with your payoff constraint - Aggressive 5-year payoff requires high income after graduation
+
+IMPORTANT DISCLAIMER
+This information is for educational purposes only and does not constitute financial advice. Loan terms, rates, and eligibility requirements may vary. Always consult with your financial aid office, a financial advisor, or loan servicer for personalized guidance and binding decisions. Rates and terms are subject to change and may differ from those shown.
+`;
 
 const EducationPage: React.FC = () => {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
@@ -543,6 +658,9 @@ const EducationPage: React.FC = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Education Chatbot */}
+      <EducationChatbot educationContent={EDUCATION_CONTENT} />
     </div>
   );
 };
