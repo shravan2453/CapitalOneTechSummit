@@ -14,6 +14,8 @@ import OptimizerPage from './pages/OptimizerPage';
 import ProfilePage from './pages/ProfilePage';
 import MyLoansPage from './pages/MyLoansPage';
 import EducationPage from './pages/EducationPage';
+//import StudentLoanOptimizerPage from './pages/StudentLoanOptimizerPage';
+import { LoanOptimizer } from './pages/LoanOptimizer';
 // import LoansForm from './pages/LoansForm'; // From loans-page branch
 
 const AppContent: React.FC = () => {
@@ -139,7 +141,7 @@ const AppContent: React.FC = () => {
       case 'calculator':
         return <CalculatorPage />;
       case 'optimizer':
-        return <OptimizerPage />;
+        return <LoanOptimizer />;
       case 'profile':
         return <ProfilePage />;
       case 'my-loans':
