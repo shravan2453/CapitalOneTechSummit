@@ -31,6 +31,52 @@ const CalculatorPage: React.FC = () => {
   const totalInterest = calculation.totalInterest;
   const amortizationSchedule = calculation.amortizationSchedule;
 
+  const handleDownloadCalculation = () => {
+    // Create CSV content
+    const csvRows: string[] = [];
+    
+    // Header section
+    csvRows.push('Loan Calculation Summary');
+    csvRows.push('');
+    csvRows.push('Loan Details');
+    csvRows.push('Principal,' + principal.toFixed(2));
+    csvRows.push('Interest Rate (%),' + rate.toFixed(2));
+    csvRows.push('Term (Years),' + termYears);
+    csvRows.push('Repayment Strategy,' + repaymentStrategy);
+    csvRows.push('Extra Monthly Payment,' + (includeExtraPayments ? extraPayment.toFixed(2) : '0.00'));
+    csvRows.push('');
+    csvRows.push('Results');
+    csvRows.push('Monthly Payment,' + monthlyPayment.toFixed(2));
+    csvRows.push('Total Cost,' + totalCost.toFixed(2));
+    csvRows.push('Total Interest,' + totalInterest.toFixed(2));
+    csvRows.push('Payoff Date,' + calculation.payoffDate.toLocaleDateString());
+    csvRows.push('');
+    csvRows.push('Amortization Schedule');
+    csvRows.push('Month,Payment,Principal,Interest,Remaining Balance');
+    
+    // Add amortization schedule rows
+    amortizationSchedule.forEach(payment => {
+      csvRows.push([
+        payment.month,
+        payment.payment.toFixed(2),
+        payment.principal.toFixed(2),
+        payment.interest.toFixed(2),
+        payment.remainingBalance.toFixed(2)
+      ].join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `loan-calculation-${rate}%-${termYears}yr-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="animate-enter">
       <PageHeader 
@@ -242,31 +288,40 @@ const CalculatorPage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <div className="h-48 sm:h-56 md:h-64 flex items-end gap-1 sm:gap-2 px-2 sm:px-4 overflow-x-auto pb-2">
-                    {amortizationSchedule.slice(0, 24).map((payment, i) => {
-                      const maxBalance = Math.max(...amortizationSchedule.map(p => p.remainingBalance));
-                      const h = (payment.remainingBalance / maxBalance) * 100;
+                  <div className="h-48 sm:h-56 md:h-64 flex items-end gap-0.5 sm:gap-1 px-2 sm:px-4 overflow-x-auto pb-2 pt-10">
+                    {(() => {
+                      // Show all months
+                      const maxBalance = Math.max(...amortizationSchedule.map(p => p.remainingBalance), 1);
+                      const containerHeightPx = 192; // Base height for h-48
+                      
+                      return amortizationSchedule.map((payment, i) => {
+                        const h = maxBalance > 0 ? (payment.remainingBalance / maxBalance) * 100 : 0;
+                        const barHeightPx = (containerHeightPx * h) / 100;
+                      
                       return (
-                        <div key={i} className="flex-1 min-w-[10px] sm:min-w-[12px] rounded-t-sm relative group overflow-hidden cursor-pointer border border-cap-red/20" style={{
+                        <div key={i} className="flex-1 min-w-[10px] sm:min-w-[12px] rounded-t-sm relative group overflow-visible cursor-pointer border border-cap-red/20" style={{
                           background: 'linear-gradient(180deg, #F3F4F6 0%, #E5E7EB 100%)',
                           boxShadow: 'inset 0 1px 2px rgba(200, 16, 46, 0.1)'
                         }}>
                           <div className="absolute bottom-0 w-full bg-cap-red transition-all duration-300 group-hover:bg-cap-redHover rounded-t-sm" style={{
-                            height: `${h}%`,
+                            height: `${barHeightPx}px`,
+                            minHeight: payment.remainingBalance > 0 ? '4px' : '0',
                             boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(200, 16, 46, 0.3)'
                           }}></div>
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 border border-cap-red/20" style={{
-                            background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                            boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(200, 16, 46, 0.2), 0 2px 4px rgba(200, 16, 46, 0.1)'
-                          }}>
-                            Month {payment.month}: ${payment.remainingBalance.toFixed(0)}
-                          </div>
+                          {payment.remainingBalance > 0 && (
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 text-gray-900 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border border-cap-red/20 pointer-events-none" style={{
+                              background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
+                              boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), inset 0 -1px 2px rgba(200, 16, 46, 0.2), 0 2px 4px rgba(200, 16, 46, 0.1)'
+                            }}>
+                              Month {payment.month}: ${payment.remainingBalance.toFixed(0)}
+                            </div>
+                          )}
                         </div>
-                      )
-                    })}
+                      );
+                    })})()}
                   </div>
                   <div className="mt-3 text-xs text-gray-600 text-center">
-                    Hover over bars to see remaining balance
+                    Showing all {amortizationSchedule.length} months • Hover over bars to see remaining balance • Scroll horizontally to see more
                   </div>
                 </>
               )}
@@ -315,7 +370,15 @@ const CalculatorPage: React.FC = () => {
                   )}
                 </div>
               </Card>
-              <Button fullWidth variant="primary" icon="save" className="text-sm py-3">Save Calculation</Button>
+              <Button 
+                fullWidth 
+                variant="primary" 
+                icon="download" 
+                className="text-sm py-3"
+                onClick={handleDownloadCalculation}
+              >
+                Download Calculation
+              </Button>
             </div>
           </div>
         </div>
