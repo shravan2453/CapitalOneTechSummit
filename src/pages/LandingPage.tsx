@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, ChevronRight, ChevronDown, Building2, Sliders, Zap, Download, Lock,
   Scale, Layers, GitBranch, Calculator, TrendingUp, FileText, ShieldCheck, EyeOff, DownloadCloud, Landmark
@@ -17,6 +17,51 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  // Hide Spline watermark after it loads
+  useEffect(() => {
+    const hideWatermark = () => {
+      const viewer = document.querySelector('spline-viewer');
+      if (viewer && viewer.shadowRoot) {
+        const shadowRoot = viewer.shadowRoot;
+        
+        // Hide watermark links and elements in shadow DOM
+        const links = shadowRoot.querySelectorAll('a[href*="spline"]');
+        links.forEach(link => {
+          (link as HTMLElement).style.display = 'none';
+          (link as HTMLElement).style.visibility = 'hidden';
+          (link as HTMLElement).style.opacity = '0';
+        });
+        
+        // Hide any elements with watermark/logo classes
+        const watermarkElements = shadowRoot.querySelectorAll('[class*="watermark"], [class*="logo"], [class*="branding"]');
+        watermarkElements.forEach(el => {
+          (el as HTMLElement).style.display = 'none';
+          (el as HTMLElement).style.visibility = 'hidden';
+          (el as HTMLElement).style.opacity = '0';
+        });
+      }
+    };
+
+    // Try to hide watermark when component mounts and periodically
+    hideWatermark();
+    const interval = setInterval(hideWatermark, 1000);
+    
+    // Also use MutationObserver to catch dynamically added elements
+    const observer = new MutationObserver(() => {
+      hideWatermark();
+    });
+    
+    const viewer = document.querySelector('spline-viewer');
+    if (viewer) {
+      observer.observe(viewer, { childList: true, subtree: true });
+    }
+    
+    return () => {
+      clearInterval(interval);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Navigation */}
@@ -34,16 +79,51 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
               className="flex-shrink-0 flex items-center cursor-pointer"
               onClick={() => setPage('landing')}
             >
+              {/* Red Crescent Shape */}
               <div 
-                className="h-8 w-8 rounded flex items-center justify-center mr-2 text-white font-bold"
+                className="h-10 w-10 mr-3 flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(145deg, #C8102E 0%, #E0112F 50%, #a30d25 100%)',
-                  boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(163, 13, 37, 0.5), 0 2px 4px rgba(200, 16, 46, 0.3)'
+                  position: 'relative'
                 }}
               >
-                <Landmark size={18} />
+                <svg 
+                  width="40" 
+                  height="40" 
+                  viewBox="0 0 40 40" 
+                  fill="none" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path 
+                    d="M20 5 C 30 5, 35 10, 35 20 C 35 30, 30 35, 20 35" 
+                    stroke="#C8102E" 
+                    strokeWidth="6" 
+                    fill="none" 
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
               </div>
-              <span className="font-bold text-xl tracking-tighter text-gray-900">ONELOAN</span>
+              {/* Text */}
+              <div className="flex flex-col">
+                <span 
+                  className="font-bold text-2xl leading-none text-cap-red"
+                  style={{
+                    fontFamily: 'sans-serif',
+                    letterSpacing: '-0.02em'
+                  }}
+                >
+                  ONE
+                </span>
+                <span 
+                  className="text-sm font-medium text-gray-600 leading-none mt-0.5"
+                  style={{
+                    fontFamily: 'sans-serif',
+                    letterSpacing: '0.01em'
+                  }}
+                >
+                  LOAN
+                </span>
+              </div>
             </div>
 
             {/* Desktop Menu */}
@@ -100,29 +180,52 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
       {/* Hero Section */}
       <section 
         className="relative text-white overflow-hidden pt-16"
-        style={{
-          background: 'linear-gradient(135deg, #003087 0%, #0044AA 40%, #C8102E 100%)',
-        }}
       >
+        {/* Spline 3D Background */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          <spline-viewer 
+            url="https://prod.spline.design/yIl02krjS1EQdnqY/scene.splinecode"
+            style={{
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+            }}
+          ></spline-viewer>
+        </div>
+        
+        {/* Overlay for better text readability */}
         <div 
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiLz48L3N2Zz4=")`
-          }}
+          className="absolute inset-0 bg-black/30 z-[1]"
         ></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 relative z-[2]">
           <div className="lg:grid lg:grid-cols-12 lg:gap-16 items-center">
             <div className="lg:col-span-6 text-center lg:text-left mb-12 lg:mb-0">
-              <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight">
+              <div 
+                className="px-8 py-8 rounded-xl border-2 border-white/50 mb-8"
+                style={{
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  backdropFilter: 'blur(15px)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                }}
+              >
+                <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6 leading-tight text-white drop-shadow-lg">
                 Borrow smarter.<br />
                 Repay faster.<br />
                 <span className="text-red-300">Stress less.</span>
               </h1>
-              <p className="text-lg text-blue-100 mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                Compare federal, private, and state/CFNC loans. Build what-if scenarios and get optimized repayment strategies tailored specifically to your post-grad budget.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <p 
+                  className="text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 text-white/90 font-normal"
+                  style={{
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  Compare loans, build scenarios, and discover the best repayment plan tailored to your financial goals.
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mt-6">
               <Button 
                 variant="primary" 
                 onClick={() => setPage('signup')}
@@ -221,10 +324,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
             ].map((item, i) => (
               <span 
                 key={i}
-                className="flex items-center gap-2 px-3 py-1 rounded-full border border-cap-red/20 text-sm font-medium text-gray-700"
+                className="flex items-center gap-2 px-3 py-1 rounded-full border border-white/30 text-sm font-medium text-gray-700"
                 style={{
-                  background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                  boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 1px 2px rgba(200, 16, 46, 0.1)'
+                  background: 'rgba(255, 255, 255, 0.3)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
                 }}
               >
                 <item.icon className="w-4 h-4 text-cap-navy" />
@@ -253,17 +357,19 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
           ].map((feature, i) => (
             <div 
               key={i}
-              className="p-8 rounded-2xl border border-cap-red/20 hover:border-cap-red/40 transition-all group"
+              className="p-8 rounded-2xl border border-white/30 hover:border-white/50 transition-all group"
               style={{
-                background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(200, 16, 46, 0.2), 0 4px 8px rgba(200, 16, 46, 0.15)'
+                background: 'rgba(255, 255, 255, 0.25)',
+                backdropFilter: 'blur(15px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
               }}
             >
               <div 
-                className="w-12 h-12 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"
+                className="w-12 h-12 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-white/20"
                 style={{
-                  background: 'linear-gradient(145deg, #F9FAFB 0%, #FFFFFF 50%, #F3F4F6 100%)',
-                  boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(200, 16, 46, 0.1)'
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                 }}
               >
                 <feature.icon className="w-6 h-6 text-cap-navy" />
@@ -294,10 +400,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
               ].map((step, i) => (
                 <div 
                   key={i}
-                  className="p-6 rounded-xl border border-cap-red/20 text-center"
+                  className="p-6 rounded-xl border border-white/30 text-center"
                   style={{
-                    background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                    boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(200, 16, 46, 0.2), 0 4px 8px rgba(200, 16, 46, 0.15)'
+                    background: 'rgba(255, 255, 255, 0.25)',
+                    backdropFilter: 'blur(15px)',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                   }}
                 >
                   <div 
@@ -332,13 +439,14 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
           
           <div className="lg:w-2/3">
             <div 
-              className="rounded-xl border border-cap-red/20 overflow-hidden"
+              className="rounded-xl border border-white/30 overflow-hidden"
               style={{
-                background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(200, 16, 46, 0.2), 0 8px 16px rgba(200, 16, 46, 0.2)'
+                background: 'rgba(255, 255, 255, 0.25)',
+                backdropFilter: 'blur(15px)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
               }}
             >
-              <div className="bg-gray-50 px-6 py-4 border-b border-cap-red/10 flex justify-between items-center">
+              <div className="px-6 py-4 border-b border-white/20 flex justify-between items-center" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
                 <span className="font-semibold text-gray-900">Scenario Comparison</span>
                 <div className="flex gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-400"></div>
@@ -348,7 +456,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-gray-600">
-                  <thead className="bg-gray-50 border-b border-cap-red/10">
+                  <thead className="border-b border-white/20" style={{ background: 'rgba(255, 255, 255, 0.1)' }}>
                     <tr>
                       <th className="px-6 py-3 font-medium text-gray-900">Scenario</th>
                       <th className="px-6 py-3 font-medium text-gray-900">Monthly</th>
@@ -356,7 +464,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
                       <th className="px-6 py-3 font-medium text-gray-900">Years</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-cap-red/10">
+                  <tbody className="divide-y divide-white/20">
                     <tr className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-gray-900">A: Federal Standard</td>
                       <td className="px-6 py-4">$280</td>
@@ -437,10 +545,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
             {/* Cards */}
             <div className="space-y-4">
               <div 
-                className="p-5 rounded-xl shadow-lg transform scale-105 border-l-4 border-cap-red relative"
+                className="p-5 rounded-xl shadow-lg transform scale-105 border-l-4 border-white/40 relative border border-white/20"
                 style={{
-                  background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                  boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(200, 16, 46, 0.2), 0 8px 16px rgba(200, 16, 46, 0.2)'
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  backdropFilter: 'blur(15px)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               >
                 <div className="absolute top-0 right-0 bg-cap-red text-white text-xs font-bold px-2 py-1 rounded-bl-lg">RANK #1</div>
@@ -480,10 +589,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
             ].map((item, i) => (
               <div key={i} className="flex flex-col items-center text-center p-6">
                 <div 
-                  className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+                  className="w-12 h-12 rounded-full flex items-center justify-center mb-4 border border-white/20"
                   style={{
-                    background: 'linear-gradient(145deg, #F9FAFB 0%, #FFFFFF 50%, #F3F4F6 100%)',
-                    boxShadow: 'inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 2px 4px rgba(200, 16, 46, 0.1)'
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                   }}
                 >
                   <item.icon className="w-6 h-6 text-cap-navy" />
@@ -518,10 +628,11 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
             ].map((faq, i) => (
               <div 
                 key={i}
-                className="rounded-lg border border-cap-red/20 overflow-hidden"
+                className="rounded-lg border border-white/30 overflow-hidden"
                 style={{
-                  background: 'linear-gradient(145deg, #FFFFFF 0%, #F9FAFB 50%, #F3F4F6 100%)',
-                  boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.8), inset 0 -2px 4px rgba(200, 16, 46, 0.2), 0 4px 8px rgba(200, 16, 46, 0.15)'
+                  background: 'rgba(255, 255, 255, 0.25)',
+                  backdropFilter: 'blur(15px)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)'
                 }}
               >
                 <button 
@@ -534,7 +645,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ setPage }) => {
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="p-5 pt-0 text-sm text-gray-600 leading-relaxed border-t border-cap-red/10">
+                  <div className="p-5 pt-0 text-sm text-gray-600 leading-relaxed border-t border-white/20">
                     {faq.a}
                   </div>
                 )}

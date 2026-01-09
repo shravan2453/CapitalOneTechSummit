@@ -105,14 +105,52 @@ const SignupPage: React.FC<SignupPageProps> = ({ setPage }) => {
         }}
       >
         <div className="text-center mb-8">
-          <div 
-            className="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4"
-            style={{
-              background: 'linear-gradient(145deg, #C8102E 0%, #E0112F 50%, #a30d25 100%)',
-              boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(163, 13, 37, 0.5), 0 2px 4px rgba(200, 16, 46, 0.3)'
-            }}
-          >
-            <Landmark className="text-white" size={24} />
+          <div className="flex items-center justify-center gap-3 mb-4">
+            {/* Red Crescent Shape */}
+            <div 
+              className="h-10 w-10 flex items-center justify-center"
+              style={{
+                position: 'relative'
+              }}
+            >
+              <svg 
+                width="40" 
+                height="40" 
+                viewBox="0 0 40 40" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  d="M20 5 C 30 5, 35 10, 35 20 C 35 30, 30 35, 20 35" 
+                  stroke="#C8102E" 
+                  strokeWidth="6" 
+                  fill="none" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            {/* Text */}
+            <div className="flex flex-col">
+              <span 
+                className="font-bold text-2xl leading-none text-cap-red"
+                style={{
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '-0.02em'
+                }}
+              >
+                ONE
+              </span>
+              <span 
+                className="text-sm font-medium text-gray-600 leading-none mt-0.5"
+                style={{
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '0.01em'
+                }}
+              >
+                LOAN
+              </span>
+            </div>
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Create your account</h2>
           <p className="text-sm text-gray-600 mt-2">Start optimizing your loans today</p>

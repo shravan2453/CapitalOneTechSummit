@@ -59,17 +59,52 @@ const Navbar: React.FC<NavbarProps> = ({ activePage, setPage }) => {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-18">
-          <div className="flex items-center gap-3 py-4">
+          <div className="flex items-center gap-3 py-4 cursor-pointer" onClick={() => setPage('dashboard')}>
+            {/* Red Crescent Shape */}
             <div 
-              className="w-10 h-10 rounded-lg flex items-center justify-center text-white"
+              className="h-10 w-10 flex items-center justify-center"
               style={{
-                background: 'linear-gradient(145deg, #C8102E 0%, #E0112F 50%, #a30d25 100%)',
-                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.3), inset 0 -2px 4px rgba(163, 13, 37, 0.5), 0 2px 4px rgba(200, 16, 46, 0.3)'
+                position: 'relative'
               }}
             >
-              <Landmark size={22} />
+              <svg 
+                width="40" 
+                height="40" 
+                viewBox="0 0 40 40" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  d="M20 5 C 30 5, 35 10, 35 20 C 35 30, 30 35, 20 35" 
+                  stroke="#C8102E" 
+                  strokeWidth="6" 
+                  fill="none" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">OneLoan</span>
+            {/* Text */}
+            <div className="flex flex-col">
+              <span 
+                className="font-bold text-2xl leading-none text-white"
+                style={{
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '-0.02em'
+                }}
+              >
+                ONE
+              </span>
+              <span 
+                className="text-sm font-medium text-white/70 leading-none mt-0.5"
+                style={{
+                  fontFamily: 'sans-serif',
+                  letterSpacing: '0.01em'
+                }}
+              >
+                LOAN
+              </span>
+            </div>
           </div>
           
           <div className="hidden md:flex items-center space-x-1">

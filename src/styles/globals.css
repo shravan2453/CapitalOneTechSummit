@@ -92,3 +92,30 @@ input[type=range]::-webkit-slider-runnable-track {
 .delay-100 { animation-delay: 0.1s; }
 .delay-200 { animation-delay: 0.2s; }
 .delay-300 { animation-delay: 0.3s; }
+
+/* Hide Spline watermark */
+spline-viewer {
+  position: relative;
+}
+
+/* Hide Spline logo/watermark - target common watermark classes and elements */
+spline-viewer a[href*="spline.design"],
+spline-viewer a[href*="splinetool"],
+spline-viewer .spline-watermark,
+spline-viewer [class*="watermark"],
+spline-viewer [class*="logo"],
+spline-viewer [class*="branding"],
+spline-viewer [id*="watermark"],
+spline-viewer [id*="logo"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Hide shadow DOM watermark if accessible */
+spline-viewer::part(logo),
+spline-viewer::part(watermark),
+spline-viewer::part(branding) {
+  display: none !important;
+}
