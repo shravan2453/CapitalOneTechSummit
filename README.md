@@ -9,7 +9,7 @@ A React web application that helps students compare loan options, calculate repa
 - **Calculator** - Calculate loan payments, total cost, and view full amortization schedules with extra payment options
 - **Optimizer** - Get personalized loan recommendations based on your profile and goals
 - **My Loans** - Manage your personal loan portfolio with detailed loan information
-- **Education** - Comprehensive guide to understanding student loans, repayment options, and optimization strategies
+- **Education** - Comprehensive guide to understanding student loans, repayment options, and optimization strategies, supported by an AI chatbot assistant.
 - **Profile** - Manage your personal details, financial context, and loan preferences
 
 ## Tech Stack
@@ -132,6 +132,7 @@ Open your browser and navigate to `http://localhost:5173`
 - Comprehensive guide to student loans
 - Information about federal, state, and private loans
 - Repayment strategies and optimization tips
+- Access to AI chatbot Luna to help answer questions
 
 ## Development
 
