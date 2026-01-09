@@ -14,7 +14,6 @@ import OptimizerPage from './pages/OptimizerPage';
 import ProfilePage from './pages/ProfilePage';
 import MyLoansPage from './pages/MyLoansPage';
 // import LoansForm from './pages/LoansForm'; // From loans-page branch
-import './styles/globals.css';
 
 const AppContent: React.FC = () => {
   // Current page state for navigation
