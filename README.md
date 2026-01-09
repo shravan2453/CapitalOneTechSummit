@@ -1,4 +1,5 @@
 # Capital One Tech Summit - Loan Comparison App
+<img width="2560" height="919" alt="Capital_One_logo svg-1" src="https://github.com/user-attachments/assets/7fdc2249-a91e-41d9-9e71-5c4a3e150ae9" />
 
 A React web application that helps students compare loan options, calculate repayment scenarios, and optimize their loan strategy based on their personal financial situation.
 
