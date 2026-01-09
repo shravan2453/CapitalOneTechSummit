@@ -34,6 +34,12 @@ const MyLoansPage: React.FC = () => {
     max_amount: 0,
     amount: 0,
     repayment_plan: '',
+    loan_category: '',
+    loan_subtype: '',
+    year_level: '',
+    annual_limit: undefined,
+    aggregate_limit: undefined,
+    in_school_payment_strategy: '',
   });
 
   useEffect(() => {
@@ -70,6 +76,12 @@ const MyLoansPage: React.FC = () => {
       max_amount: 0,
       amount: 0,
       repayment_plan: '',
+      loan_category: '',
+      loan_subtype: '',
+      year_level: '',
+      annual_limit: undefined,
+      aggregate_limit: undefined,
+      in_school_payment_strategy: '',
     });
     setShowAddForm(false);
     setEditingId(null);
@@ -145,6 +157,12 @@ const MyLoansPage: React.FC = () => {
       max_amount: loan.max_amount || 0,
       amount: loan.amount || 0,
       repayment_plan: loan.repayment_plan || '',
+      loan_category: loan.loan_category || '',
+      loan_subtype: loan.loan_subtype || '',
+      year_level: loan.year_level || '',
+      annual_limit: loan.annual_limit,
+      aggregate_limit: loan.aggregate_limit,
+      in_school_payment_strategy: loan.in_school_payment_strategy || '',
     });
     setEditingId(loan.id);
     setShowAddForm(true);
@@ -306,6 +324,7 @@ const MyLoansPage: React.FC = () => {
                     >
                       <option value="fixed">Fixed</option>
                       <option value="variable">Variable</option>
+                      <option value="both">Both Available</option>
                     </select>
                   </div>
 
@@ -365,7 +384,7 @@ const MyLoansPage: React.FC = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Your Loan Details</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Repayment Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -385,12 +404,103 @@ const MyLoansPage: React.FC = () => {
                     <label className="block text-sm font-semibold text-gray-900 mb-2">
                       Repayment Plan
                     </label>
-                    <input
-                      type="text"
+                    <select
                       value={loanFormData.repayment_plan || ''}
                       onChange={(e) => handleInputChange('repayment_plan', e.target.value)}
                       className="w-full px-4 py-2 border-2 border-cap-red/20 rounded-xl focus:ring-2 focus:ring-cap-red/20 focus:border-cap-red/40 outline-none text-gray-900"
-                      placeholder="e.g., Standard, Income-Driven"
+                    >
+                      <option value="">Select plan</option>
+                      <option value="standard">Standard</option>
+                      <option value="graduated">Graduated</option>
+                      <option value="extended">Extended</option>
+                      <option value="SAVE">SAVE</option>
+                      <option value="IBR">IBR</option>
+                      <option value="PAYE">PAYE</option>
+                      <option value="REPAYE">REPAYE</option>
+                      <option value="ICR">ICR</option>
+                      <option value="interest-only">Interest Only</option>
+                      <option value="defer">Defer</option>
+                      <option value="biweekly">Biweekly</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Loan Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Loan Subtype
+                    </label>
+                    <input
+                      type="text"
+                      value={loanFormData.loan_subtype || ''}
+                      onChange={(e) => handleInputChange('loan_subtype', e.target.value)}
+                      className="w-full px-4 py-2 border-2 border-cap-red/20 rounded-xl focus:ring-2 focus:ring-cap-red/20 focus:border-cap-red/40 outline-none text-gray-900"
+                      placeholder="e.g., Direct Subsidized, Parent PLUS"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Year Level
+                    </label>
+                    <select
+                      value={loanFormData.year_level || ''}
+                      onChange={(e) => handleInputChange('year_level', e.target.value)}
+                      className="w-full px-4 py-2 border-2 border-cap-red/20 rounded-xl focus:ring-2 focus:ring-cap-red/20 focus:border-cap-red/40 outline-none text-gray-900"
+                    >
+                      <option value="">Select year</option>
+                      <option value="freshman">Freshman</option>
+                      <option value="sophomore">Sophomore</option>
+                      <option value="junior">Junior</option>
+                      <option value="senior">Senior</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      In-School Payment Strategy
+                    </label>
+                    <select
+                      value={loanFormData.in_school_payment_strategy || ''}
+                      onChange={(e) => handleInputChange('in_school_payment_strategy', e.target.value)}
+                      className="w-full px-4 py-2 border-2 border-cap-red/20 rounded-xl focus:ring-2 focus:ring-cap-red/20 focus:border-cap-red/40 outline-none text-gray-900"
+                    >
+                      <option value="">Select strategy</option>
+                      <option value="defer">Full Deferment</option>
+                      <option value="interest-only">Interest Only</option>
+                      <option value="fixed-25">Fixed $25</option>
+                      <option value="full">Full Payment</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Annual Limit ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={loanFormData.annual_limit || ''}
+                      onChange={(e) => handleInputChange('annual_limit', e.target.value ? parseFloat(e.target.value) : undefined)}
+                      className="w-full px-4 py-2 border-2 border-cap-red/20 rounded-xl focus:ring-2 focus:ring-cap-red/20 focus:border-cap-red/40 outline-none text-gray-900"
+                      min="0"
+                      placeholder="Maximum per year"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      Aggregate Limit ($)
+                    </label>
+                    <input
+                      type="number"
+                      value={loanFormData.aggregate_limit || ''}
+                      onChange={(e) => handleInputChange('aggregate_limit', e.target.value ? parseFloat(e.target.value) : undefined)}
+                      className="w-full px-4 py-2 border-2 border-cap-red/20 rounded-xl focus:ring-2 focus:ring-cap-red/20 focus:border-cap-red/40 outline-none text-gray-900"
+                      min="0"
+                      placeholder="Maximum total"
                     />
                   </div>
                 </div>
@@ -464,7 +574,7 @@ const MyLoansPage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {(loan.lender || loan.fixed_variable) && (
+                    {(loan.lender || loan.fixed_variable || loan.year_level || loan.in_school_payment_strategy) && (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
                         {loan.lender && (
                           <div>
@@ -474,10 +584,75 @@ const MyLoansPage: React.FC = () => {
                         )}
                         {loan.fixed_variable && (
                           <div>
-                            <p className="text-gray-500">Type</p>
+                            <p className="text-gray-500">Rate Type</p>
                             <p className="font-semibold text-gray-900 capitalize">{loan.fixed_variable}</p>
                           </div>
                         )}
+                        {loan.year_level && (
+                          <div>
+                            <p className="text-gray-500">Year Level</p>
+                            <p className="font-semibold text-gray-900 capitalize">{loan.year_level}</p>
+                          </div>
+                        )}
+                        {loan.in_school_payment_strategy && (
+                          <div>
+                            <p className="text-gray-500">In-School Strategy</p>
+                            <p className="font-semibold text-gray-900 capitalize">
+                              {loan.in_school_payment_strategy === 'defer' ? 'Full Deferment' :
+                               loan.in_school_payment_strategy === 'interest-only' ? 'Interest Only' :
+                               loan.in_school_payment_strategy === 'fixed-25' ? 'Fixed $25' :
+                               loan.in_school_payment_strategy === 'full' ? 'Full Payment' :
+                               loan.in_school_payment_strategy}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {(loan.annual_limit || loan.aggregate_limit) && (
+                      <div className="grid grid-cols-2 gap-4 mt-4 text-sm">
+                        {loan.annual_limit && (
+                          <div>
+                            <p className="text-gray-500">Annual Limit</p>
+                            <p className="font-semibold text-gray-900">${loan.annual_limit.toLocaleString()}</p>
+                          </div>
+                        )}
+                        {loan.aggregate_limit && (
+                          <div>
+                            <p className="text-gray-500">Aggregate Limit</p>
+                            <p className="font-semibold text-gray-900">${loan.aggregate_limit.toLocaleString()}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {(loan.total_cost || loan.total_interest || loan.weighted_avg_rate || loan.payoff_date) && (
+                      <div className="mt-4 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+                        <h4 className="font-semibold text-gray-900 mb-3">Calculated Metrics</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          {loan.total_cost && (
+                            <div>
+                              <p className="text-gray-500">Total Cost</p>
+                              <p className="font-semibold text-gray-900">${loan.total_cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            </div>
+                          )}
+                          {loan.total_interest && (
+                            <div>
+                              <p className="text-gray-500">Total Interest</p>
+                              <p className="font-semibold text-gray-900">${loan.total_interest.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            </div>
+                          )}
+                          {loan.weighted_avg_rate && (
+                            <div>
+                              <p className="text-gray-500">Avg Rate</p>
+                              <p className="font-semibold text-gray-900">{loan.weighted_avg_rate.toFixed(2)}%</p>
+                            </div>
+                          )}
+                          {loan.payoff_date && (
+                            <div>
+                              <p className="text-gray-500">Payoff Date</p>
+                              <p className="font-semibold text-gray-900">{new Date(loan.payoff_date).toLocaleDateString()}</p>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     )}
                   </div>

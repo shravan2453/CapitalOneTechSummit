@@ -15,8 +15,18 @@ export interface LoanRecord {
   grace_period: number | null;
   min_payment: number | null;
   max_amount: number | null;
-  amount: number | null; // User's loan amount
-  repayment_plan: string | null; // User's repayment plan
+  amount: number | null;
+  repayment_plan: string | null;
+  loan_category: string | null;
+  loan_subtype: string | null;
+  year_level: string | null;
+  annual_limit: number | null;
+  aggregate_limit: number | null;
+  in_school_payment_strategy: string | null;
+  weighted_avg_rate: number | null;
+  total_cost: number | null;
+  total_interest: number | null;
+  payoff_date: string | null;
 }
 
 export interface CreateLoanData {
@@ -30,8 +40,18 @@ export interface CreateLoanData {
   grace_period?: number;
   min_payment?: number;
   max_amount?: number;
-  amount: number; // Required: user's loan amount
-  repayment_plan?: string; // Optional: user's repayment plan
+  amount: number;
+  repayment_plan?: string;
+  loan_category?: string;
+  loan_subtype?: string;
+  year_level?: string;
+  annual_limit?: number;
+  aggregate_limit?: number;
+  in_school_payment_strategy?: string;
+  weighted_avg_rate?: number;
+  total_cost?: number;
+  total_interest?: number;
+  payoff_date?: string;
 }
 
 export const loanService = {
