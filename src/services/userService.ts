@@ -17,9 +17,22 @@ export interface UserRecord {
   monthly_budget: number;
   other_debt: number | null;
   financial_dependents: number | null;
-  risk_preference: string;
+  risk_preference: string | null;
   target_payoff_date: string | null;
-  prioritize: string;
+  prioritize: string | null;
+  dependency_status: string | null;
+  annual_gap: number | null;
+  cosigner: boolean | null;
+  subsidizable: boolean | null;
+  fels_eligible: boolean | null;
+  parent_plus: boolean | null;
+  target_payoff_duration: number | null;
+  max_monthly_payment: number | null;
+  in_school_payment: string | null;
+  tuition_growth_rate: number | null;
+  year_level: string | null;
+  optimize_by: string | null;
+  family_size: number | null;
 }
 
 export const userService = {
@@ -80,6 +93,19 @@ export const userService = {
     risk_preference?: string;
     target_payoff_date?: string;
     prioritize?: string;
+    dependency_status?: string;
+    annual_gap?: number;
+    cosigner?: boolean;
+    subsidizable?: boolean;
+    fels_eligible?: boolean;
+    parent_plus?: boolean;
+    target_payoff_duration?: number;
+    max_monthly_payment?: number;
+    in_school_payment?: string;
+    tuition_growth_rate?: number;
+    year_level?: string;
+    optimize_by?: string;
+    family_size?: number;
   }): Promise<UserRecord> {
     const { data, error } = await supabase
       .from('users')
