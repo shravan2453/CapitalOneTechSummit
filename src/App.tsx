@@ -13,6 +13,7 @@ import CalculatorPage from './pages/CalculatorPage';
 import OptimizerPage from './pages/OptimizerPage';
 import ProfilePage from './pages/ProfilePage';
 import MyLoansPage from './pages/MyLoansPage';
+import EducationPage from './pages/EducationPage';
 // import LoansForm from './pages/LoansForm'; // From loans-page branch
 
 const AppContent: React.FC = () => {
@@ -106,6 +107,8 @@ const AppContent: React.FC = () => {
       setCurrentPage('login');
     }
   }, [user, loading, currentPage]);
+  
+  // Education page is accessible to everyone (no auth required)
 
   // Handle OAuth callback: redirect to dashboard after successful OAuth login
   useEffect(() => {
@@ -141,6 +144,8 @@ const AppContent: React.FC = () => {
         return <ProfilePage />;
       case 'my-loans':
         return <MyLoansPage />;
+      case 'education':
+        return <EducationPage />;
       // case 'loanform':
       //   return <LoansForm /> // From loans-page branch
       default:
