@@ -7,9 +7,10 @@ interface CardProps {
   className?: string;
   noPadding?: boolean;
   highlight?: boolean;
+  onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = "", noPadding = false, highlight = false }) => {
+export const Card: React.FC<CardProps> = ({ children, className = "", noPadding = false, highlight = false, onClick }) => {
   // Check if className contains background override
   const hasBgOverride = className.includes('bg-') || className.includes('!bg-');
   const baseClasses = hasBgOverride 
@@ -22,11 +23,12 @@ export const Card: React.FC<CardProps> = ({ children, className = "", noPadding 
   
   return (
     <div 
-      className={baseClasses} 
+      className={`${baseClasses} ${onClick ? 'cursor-pointer' : ''}`} 
       style={{
         background: hasBgOverride ? undefined : cardGradient,
         boxShadow: cardShadow
       }}
+      onClick={onClick}
       onMouseEnter={(e) => {
         if (!hasBgOverride) {
           e.currentTarget.style.boxShadow = cardShadowHover;
@@ -57,6 +59,7 @@ interface ButtonProps {
   icon?: string;
   fullWidth?: boolean;
   type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({ 
@@ -66,7 +69,8 @@ export const Button: React.FC<ButtonProps> = ({
   onClick, 
   icon, 
   fullWidth = false,
-  type = "button"
+  type = "button",
+  disabled = false
 }) => {
   const base = "inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-200 active:scale-[0.98] relative";
   const variants = {
@@ -109,14 +113,17 @@ export const Button: React.FC<ButtonProps> = ({
     <button 
       type={type}
       onClick={onClick} 
-      className={`${base} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${className}`}
+      disabled={disabled}
+      className={`${base} ${variants[variant]} ${fullWidth ? 'w-full' : ''} ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}
       style={{
         background: style.normal,
         boxShadow: style.shadow
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = style.hover;
-        e.currentTarget.style.boxShadow = style.shadowHover;
+        if (!disabled) {
+          e.currentTarget.style.background = style.hover;
+          e.currentTarget.style.boxShadow = style.shadowHover;
+        }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.background = style.normal;
@@ -170,7 +177,7 @@ interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, action }) => (
   <div 
-    className="pt-6 sm:pt-8 pb-16 sm:pb-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-[-2rem] sm:mb-[-3rem] border-b-2 border-cap-red/20"
+    className="pt-8 sm:pt-10 pb-12 sm:pb-14 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 border-b-2 border-cap-red/20"
     style={{
       background: 'linear-gradient(135deg, #C8102E 0%, #E0112F 50%, #C8102E 100%)',
       boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.2), 0 4px 8px rgba(200, 16, 46, 0.3)'

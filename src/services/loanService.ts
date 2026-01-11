@@ -27,6 +27,8 @@ export interface LoanRecord {
   total_cost: number | null;
   total_interest: number | null;
   payoff_date: string | null;
+  is_paid: boolean;
+  paid_date: string | null;
 }
 
 export interface CreateLoanData {
@@ -52,6 +54,8 @@ export interface CreateLoanData {
   total_cost?: number;
   total_interest?: number;
   payoff_date?: string;
+  is_paid?: boolean;
+  paid_date?: string;
 }
 
 export const loanService = {
@@ -224,6 +228,110 @@ export const loanService = {
 
     if (error) {
       throw new Error(`Error deleting loan: ${error.message}`);
+    }
+  },
+
+  /**
+   * Create multiple loans at once (for optimizer plan selection)
+   * @param loansData - Array of loan data to create
+   * @returns Created loan records
+   */
+  async createLoans(loansData: CreateLoanData[]): Promise<LoanRecord[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user || !user.email) {
+      throw new Error('User must be authenticated to create loans');
+    }
+
+    const userRecord = await userService.getUserByEmail(user.email);
+    
+    if (!userRecord) {
+      throw new Error('User profile not found. Please complete your profile first.');
+    }
+
+    const loansWithUserId = loansData.map(loan => ({
+      ...loan,
+      user_id: userRecord.id
+    }));
+
+    const { data, error } = await supabase
+      .from('loans')
+      .insert(loansWithUserId)
+      .select();
+
+    if (error) {
+      throw new Error(`Error creating loans: ${error.message}`);
+    }
+
+    return data || [];
+  },
+
+  /**
+   * Toggle the paid status of a loan
+   * @param id - Loan UUID
+   * @param isPaid - Whether the loan is paid
+   * @returns Updated loan record
+   */
+  async toggleLoanPaid(id: string, isPaid: boolean): Promise<LoanRecord> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user || !user.email) {
+      throw new Error('User must be authenticated');
+    }
+
+    const userRecord = await userService.getUserByEmail(user.email);
+    
+    if (!userRecord) {
+      throw new Error('User profile not found.');
+    }
+
+    const updateData: { is_paid: boolean; paid_date: string | null } = {
+      is_paid: isPaid,
+      paid_date: isPaid ? new Date().toISOString().split('T')[0] : null
+    };
+
+    const { data, error } = await supabase
+      .from('loans')
+      .update(updateData)
+      .eq('id', id)
+      .eq('user_id', userRecord.id)
+      .select()
+      .single();
+
+    if (error) {
+      throw new Error(`Error updating loan: ${error.message}`);
+    }
+
+    if (!data) {
+      throw new Error('No data returned from update');
+    }
+
+    return data;
+  },
+
+  /**
+   * Delete all loans for the current user (to replace with optimizer selection)
+   */
+  async deleteAllLoans(): Promise<void> {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user || !user.email) {
+      throw new Error('User must be authenticated');
+    }
+
+    const userRecord = await userService.getUserByEmail(user.email);
+    
+    if (!userRecord) {
+      return; // No user profile, nothing to delete
+    }
+
+    const { error } = await supabase
+      .from('loans')
+      .delete()
+      .eq('user_id', userRecord.id);
+
+    if (error) {
+      throw new Error(`Error deleting loans: ${error.message}`);
     }
   },
 };

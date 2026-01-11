@@ -2,9 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { userService } from '../services/userService';
 import { Card, Button, PageHeader } from '../components/shared';
-import { School, Users, DollarSign, Target, GraduationCap } from 'lucide-react';
+import { School, Users, DollarSign, Target, GraduationCap, AlertCircle } from 'lucide-react';
 
-const ProfilePage: React.FC = () => {
+// Required field indicator component
+const RequiredStar: React.FC = () => (
+  <span className="text-cap-red ml-0.5">*</span>
+);
+
+// Optional field indicator component
+const OptionalTag: React.FC = () => (
+  <span className="text-gray-400 text-xs font-normal ml-1">(optional)</span>
+);
+
+interface ProfilePageProps {
+  isNewUser?: boolean;
+  onProfileComplete?: () => void;
+}
+
+const ProfilePage: React.FC<ProfilePageProps> = ({ isNewUser = false, onProfileComplete }) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -256,6 +271,11 @@ const ProfilePage: React.FC = () => {
       
       // Notify app that profile was updated
       window.dispatchEvent(new CustomEvent('profileUpdated'));
+      
+      // Call completion callback for new users
+      if (onProfileComplete) {
+        onProfileComplete();
+      }
     } catch (err) {
       console.error('Error saving profile:', err);
       setError(err instanceof Error ? err.message : 'Failed to save profile. Please try again.');
@@ -267,7 +287,7 @@ const ProfilePage: React.FC = () => {
   if (loading) {
     return (
       <div className="animate-enter">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 mb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
           <div className="text-center py-12">
             <div className="w-16 h-16 border-4 border-cap-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-gray-600">Loading profile...</p>
@@ -293,7 +313,7 @@ const ProfilePage: React.FC = () => {
         }
       />
       
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 mb-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-800">
             {error}
@@ -301,6 +321,36 @@ const ProfilePage: React.FC = () => {
         )}
         
         <div className="space-y-6">
+          {/* New User Welcome Banner */}
+          {isNewUser && (
+            <div className="mb-6 p-5 bg-cap-navy/5 border-2 border-cap-navy/20 rounded-2xl">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-cap-navy/10 rounded-xl">
+                  <AlertCircle size={24} className="text-cap-navy" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900 text-lg mb-1">Complete Your Profile</h3>
+                  <p className="text-gray-600">
+                    Please fill out your profile information to use the loan optimizer and other features. 
+                    Fields marked with <span className="text-cap-red font-bold">*</span> are required.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Legend */}
+          <div className="mb-6 flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-1">
+              <span className="text-cap-red font-bold">*</span>
+              <span className="text-gray-600">Required field</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-gray-400">(optional)</span>
+              <span className="text-gray-600">Optional field</span>
+            </div>
+          </div>
+
           {/* Personal Profile Section */}
           <Card highlight>
             <div className="flex items-center gap-2 mb-6">
@@ -310,7 +360,7 @@ const ProfilePage: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">First Name *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">First Name<RequiredStar /></label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -325,7 +375,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Last Name *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Last Name<RequiredStar /></label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -340,7 +390,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Age</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Age<OptionalTag /></label>
                 {isEditing ? (
                   <input
                     type="number"
@@ -354,7 +404,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">State of Residence</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">State of Residence<OptionalTag /></label>
                 {isEditing ? (
                   <select
                     value={profile.state}
@@ -375,7 +425,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Dependency Status *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Dependency Status<RequiredStar /></label>
                 {isEditing ? (
                   <select
                     value={profile.dependencyStatus}
@@ -393,7 +443,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Year Level *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Year Level<RequiredStar /></label>
                 {isEditing ? (
                   <select
                     value={profile.yearLevel}
@@ -413,7 +463,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Graduation Date *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Graduation Date<RequiredStar /></label>
                 {isEditing ? (
                   <input
                     type="date"
@@ -428,7 +478,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Credit Score Range</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Credit Score Range<OptionalTag /></label>
                 {isEditing ? (
                   <select
                     value={profile.creditScore}
@@ -463,7 +513,7 @@ const ProfilePage: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-900 mb-2">School Name *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">School Name<RequiredStar /></label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -478,7 +528,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Program Type *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Program Type<RequiredStar /></label>
                 {isEditing ? (
                   <select
                     value={profile.programType}
@@ -497,7 +547,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Enrollment Status *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Enrollment Status<RequiredStar /></label>
                 {isEditing ? (
                   <select
                     value={profile.enrollmentStatus}
@@ -611,7 +661,7 @@ const ProfilePage: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Expected Starting Salary (Annual) *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Expected Starting Salary (Annual)<RequiredStar /></label>
                 {isEditing ? (
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">$</span>
@@ -630,7 +680,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Monthly Budget *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Monthly Budget<RequiredStar /></label>
                 {isEditing ? (
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">$</span>
@@ -649,7 +699,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Annual Funding Gap *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Annual Funding Gap<RequiredStar /></label>
                 {isEditing ? (
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">$</span>
@@ -669,7 +719,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Current Savings</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Current Savings<OptionalTag /></label>
                 {isEditing ? (
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">$</span>
@@ -687,7 +737,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Other Debt Obligations</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Other Debt Obligations<OptionalTag /></label>
                 {isEditing ? (
                   <div className="relative">
                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">$</span>
@@ -705,7 +755,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Financial Dependents</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Financial Dependents<OptionalTag /></label>
                 {isEditing ? (
                   <input
                     type="number"
@@ -720,7 +770,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Family Size</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Family Size<OptionalTag /></label>
                 {isEditing ? (
                   <input
                     type="number"
@@ -735,7 +785,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Tuition Growth Rate (%)</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Tuition Growth Rate (%)<OptionalTag /></label>
                 {isEditing ? (
                   <div className="relative">
                     <input
@@ -765,7 +815,7 @@ const ProfilePage: React.FC = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">In-School Payment *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">In-School Payment<RequiredStar /></label>
                 {isEditing ? (
                   <select
                     value={profile.inSchoolPayment}
@@ -788,7 +838,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Risk Tolerance</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Risk Tolerance<OptionalTag /></label>
                 {isEditing ? (
                   <select
                     value={profile.riskTolerance}
@@ -805,7 +855,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Prioritize</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Prioritize<OptionalTag /></label>
                 {isEditing ? (
                   <select
                     value={profile.prioritize}
@@ -827,7 +877,7 @@ const ProfilePage: React.FC = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Optimize By *</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Optimize By<RequiredStar /></label>
                 {isEditing ? (
                   <select
                     value={profile.optimizeBy}
@@ -857,7 +907,7 @@ const ProfilePage: React.FC = () => {
               
               {profile.optimizeBy === 'target_payoff_years' && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Target Payoff Duration (Years) *</label>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Target Payoff Duration (Years)<RequiredStar /></label>
                   {isEditing ? (
                     <select
                       value={profile.targetPayoffDuration || ''}
@@ -880,7 +930,7 @@ const ProfilePage: React.FC = () => {
               
               {profile.optimizeBy === 'max_monthly_payment' && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">Max Monthly Payment ($) *</label>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">Max Monthly Payment ($)<RequiredStar /></label>
                   {isEditing ? (
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">$</span>
@@ -900,7 +950,7 @@ const ProfilePage: React.FC = () => {
               )}
               
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Target Payoff Year</label>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">Target Payoff Year<OptionalTag /></label>
                 {isEditing ? (
                   <input
                     type="number"

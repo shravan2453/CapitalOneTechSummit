@@ -139,7 +139,7 @@ const EducationPage: React.FC = () => {
         subtitle="Comprehensive guide to understanding student loans, repayment options, and optimization strategies."
       />
       
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 mb-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
         <div className="space-y-6">
           {/* Introduction */}
           <Card highlight>

@@ -23,6 +23,7 @@ const AppContent: React.FC = () => {
   const { user, loading } = useAuth();
   
   const [checkingProfile, setCheckingProfile] = useState(false);
+  const [isProfileComplete, setIsProfileComplete] = useState<boolean | null>(null);
   const hasCheckedProfileRef = useRef(false);
   const previousUserRef = useRef<User | null>(null);
 
@@ -30,6 +31,7 @@ const AppContent: React.FC = () => {
     const checkProfile = async () => {
       if (!user?.email) {
         hasCheckedProfileRef.current = false;
+        setIsProfileComplete(null);
         return;
       }
       
@@ -42,9 +44,18 @@ const AppContent: React.FC = () => {
       hasCheckedProfileRef.current = true;
       
       try {
-        await userService.getUserByEmail(user.email);
+        const userRecord = await userService.getUserByEmail(user.email);
+        // Check if profile is complete (has required fields)
+        const profileComplete = userService.isProfileComplete(userRecord);
+        setIsProfileComplete(profileComplete);
+        
+        // If profile is incomplete and user is trying to access a protected page, redirect to profile
+        if (!profileComplete && !['profile', 'landing', 'login', 'signup'].includes(currentPage)) {
+          setCurrentPage('profile');
+        }
       } catch (error) {
         console.error('Error checking profile:', error);
+        setIsProfileComplete(false);
       } finally {
         setCheckingProfile(false);
       }
@@ -67,8 +78,9 @@ const AppContent: React.FC = () => {
     } else if (!loading && !user) {
       hasCheckedProfileRef.current = false;
       previousUserRef.current = null;
+      setIsProfileComplete(null);
     }
-  }, [user, loading]);
+  }, [user, loading, currentPage]);
 
   useEffect(() => {
     const handleProfileUpdate = async () => {
@@ -78,8 +90,15 @@ const AppContent: React.FC = () => {
       try {
         // Small delay to ensure database has committed the changes
         await new Promise(resolve => setTimeout(resolve, 300));
-        await userService.getUserByEmail(user.email);
+        const userRecord = await userService.getUserByEmail(user.email);
+        const profileComplete = userService.isProfileComplete(userRecord);
+        setIsProfileComplete(profileComplete);
         hasCheckedProfileRef.current = false;
+        
+        // If profile is now complete and user was on profile page, redirect to dashboard
+        if (profileComplete && currentPage === 'profile') {
+          setCurrentPage('dashboard');
+        }
       } catch (error) {
         console.error('Error checking profile after update:', error);
       } finally {
@@ -92,14 +111,28 @@ const AppContent: React.FC = () => {
     return () => {
       window.removeEventListener('profileUpdated', handleProfileUpdate);
     };
-  }, [user]);
+  }, [user, currentPage]);
 
-  // Redirect authenticated users from landing/login/signup to dashboard
+  // Redirect authenticated users from landing/login/signup
   useEffect(() => {
     if (!loading && user && ['landing', 'login', 'signup'].includes(currentPage)) {
-      setCurrentPage('dashboard');
+      // If profile check is done and profile is incomplete, go to profile
+      if (isProfileComplete === false) {
+        setCurrentPage('profile');
+      } else if (isProfileComplete === true) {
+        setCurrentPage('dashboard');
+      }
+      // If isProfileComplete is null, wait for the check to complete
     }
-  }, [user, loading, currentPage]);
+  }, [user, loading, currentPage, isProfileComplete]);
+  
+  // Redirect users with incomplete profiles to profile page when trying to access protected routes
+  useEffect(() => {
+    if (!loading && user && isProfileComplete === false && 
+        ['dashboard', 'comparison', 'calculator', 'optimizer', 'my-loans'].includes(currentPage)) {
+      setCurrentPage('profile');
+    }
+  }, [user, loading, currentPage, isProfileComplete]);
 
   // Redirect to login if user tries to access protected routes without authentication
   useEffect(() => {
@@ -139,9 +172,9 @@ const AppContent: React.FC = () => {
       case 'calculator':
         return <CalculatorPage />;
       case 'optimizer':
-        return <OptimizerPage />;
+        return <OptimizerPage setPage={setCurrentPage} />;
       case 'profile':
-        return <ProfilePage />;
+        return <ProfilePage isNewUser={isProfileComplete === false} onProfileComplete={() => setCurrentPage('dashboard')} />;
       case 'my-loans':
         return <MyLoansPage />;
       case 'education':

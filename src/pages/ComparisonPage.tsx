@@ -201,7 +201,7 @@ const ComparisonPage: React.FC<ComparisonPageProps> = ({ setPage }) => {
         subtitle="Compare federal, private, and state loan options to find your best fit."
       />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
         {/* Tabs */}
         <div className="flex justify-center mb-6 sm:mb-8">
           <div className=" p-1 sm:p-1.5 rounded-2xl shadow-premium inline-flex relative z-10 flex-wrap justify-center gap-1">

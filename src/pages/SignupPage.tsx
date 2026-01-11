@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/shared';
-import { Landmark } from 'lucide-react';
 
 interface SignupPageProps {
   setPage: (page: string) => void;
@@ -31,9 +30,9 @@ const SignupPage: React.FC<SignupPageProps> = ({ setPage }) => {
     } else {
       setSuccess(true);
       setLoading(false);
-      // Redirect to dashboard after successful signup
+      // Redirect to profile after successful signup (user needs to complete profile first)
       setTimeout(() => {
-        setPage('dashboard');
+        setPage('profile');
       }, 2000);
     }
   };
@@ -77,7 +76,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ setPage }) => {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h2>
-          <p className="text-gray-600 mb-4">Redirecting to your dashboard...</p>
+          <p className="text-gray-600 mb-4">Redirecting to complete your profile...</p>
         </div>
       </div>
     );

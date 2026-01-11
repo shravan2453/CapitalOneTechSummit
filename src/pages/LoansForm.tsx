@@ -83,7 +83,7 @@ const LoansForm: React.FC = () => {
 
   return (
     <div className="animate-enter">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12">
         <h1 className="text-2xl font-bold mb-4">Loan Details</h1>
         <form onSubmit={submit}>
           <Card className="mb-6">
