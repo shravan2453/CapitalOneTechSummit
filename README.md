@@ -84,40 +84,97 @@ The optimizer uses a **"Federal First"** strategy that prioritizes loan sources 
 
 ## Prerequisites
 
-- Node.js 18+ and npm (or yarn/pnpm)
+- **Node.js 18+** (tested with Node 20 and 22) — check with `node --version`
+- **npm 9+** — check with `npm --version`
+- macOS, Linux, or Windows (WSL recommended on Windows)
 
-## Getting Started
+If you don't have Node installed, get it from [nodejs.org](https://nodejs.org/) or via `nvm`:
 
-### 1. Install Dependencies
+```bash
+# install nvm (macOS/Linux)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+nvm install 20
+nvm use 20
+```
+
+## Local Setup
+
+### 1. Clone the repository
+
+```bash
+git clone <repo-url>
+cd CapitalOneTechSummit
+```
+
+### 2. Install dependencies
 
 ```bash
 npm install
 ```
 
-### 2. Set Up Environment Variables
+If you hit peer-dependency conflicts, retry with:
 
-Create a `.env.local` file in the root directory:
+```bash
+npm install --legacy-peer-deps
+```
+
+### 3. Configure environment variables
+
+Create a `.env.local` file in the project root. **This project uses Vite, so env vars must be prefixed with `VITE_`** (not `NEXT_PUBLIC_`):
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=supabase_project_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=supabase_anon_key
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
 **To get the Supabase credentials:**
-1. Go to the Supabase project dashboard
-2. Navigate to **Settings** → **API**
-3. Copy the **Project URL** and **anon public** key
-4. Paste them into your `.env.local` file
+1. Go to the [Supabase dashboard](https://supabase.com/dashboard)
+2. Open your project → **Settings** → **API**
+3. Copy the **Project URL** → paste as `VITE_SUPABASE_URL`
+4. Copy the **anon public** key → paste as `VITE_SUPABASE_ANON_KEY`
 
-### 3. Start Development Server
+> **Note:** `src/lib/supabase.ts` also ships with hard-coded fallback values, so the app will boot even without `.env.local`, but you should set your own credentials for real use. Always restart the dev server after editing `.env.local`.
+
+### 4. Start the development server
 
 ```bash
 npm run dev
 ```
 
-Open your browser and navigate to `http://localhost:5173`
+The app will be available at **http://localhost:5173**. Vite supports hot module replacement, so edits update instantly.
 
-**Note:** After creating or updating `.env.local`, you must restart your dev server for changes to take effect.
+### 5. Build for production (optional)
+
+```bash
+npm run build      # outputs to dist/
+npm run preview    # serves the production build locally on http://localhost:4173
+```
+
+## Available Scripts
+
+| Script | What it does |
+|--------|--------------|
+| `npm run dev` | Start the Vite dev server (port 5173) |
+| `npm run build` | Type-check with `tsc` and bundle to `dist/` |
+| `npm run preview` | Serve the built `dist/` locally for a final check |
+| `npm run lint` | Run ESLint on all `.ts` / `.tsx` files |
+
+## Troubleshooting
+
+**`npm run dev` fails with "command not found: vite"**
+Run `npm install` first — `node_modules` is gitignored.
+
+**Page loads but shows "Loading..." forever or Supabase errors**
+Your env vars are wrong. Make sure `.env.local` uses the `VITE_` prefix (not `NEXT_PUBLIC_`) and restart the dev server.
+
+**`npm run build` fails with TypeScript errors**
+The build runs `tsc` in strict mode. Use `npm run dev` for development — Vite skips full type-checking and is far more forgiving. Fix `tsc` errors before deploying.
+
+**Port 5173 is already in use**
+Either stop the other process or run `npm run dev -- --port 3000` to pick a different port.
+
+**Changes to `.env.local` aren't picked up**
+Stop the dev server (`Ctrl+C`) and run `npm run dev` again — Vite only reads env files at startup.
 
 ## Project Structure
 
