@@ -97,6 +97,40 @@ nvm install 20
 nvm use 20
 ```
 
+## Backend Setup (Supabase) — Required for Login
+
+The app uses **Supabase** for auth + database. Before you can sign up or log in, you need a live Supabase project. Steps:
+
+### 1. Create a Supabase project
+
+1. Go to [supabase.com](https://supabase.com) → sign in (GitHub is easiest).
+2. Click **New project**, pick the free tier, give it a name and a strong database password, and choose the region closest to you.
+3. Wait ~1–2 minutes for the project to provision.
+
+### 2. Run the schema migration
+
+1. In the Supabase dashboard, open **SQL Editor** (left sidebar) → **New query**.
+2. Open [`supabase/schema.sql`](./supabase/schema.sql) from this repo, copy the entire contents, paste into the editor, and click **Run**.
+3. You should see 3 tables created: `users`, `loans`, `loans_form` (verify under **Table Editor**).
+
+### 3. Grab your API keys
+
+1. Dashboard → **Settings** → **API**.
+2. Copy the **Project URL** and the **anon public** key.
+3. Paste them into your `.env.local` (see step 3 of Local Setup below).
+
+### 4. (Optional) Enable Google OAuth
+
+Only needed if you want the "Sign in with Google" button to work — email/password works without this.
+
+1. Dashboard → **Authentication** → **Providers** → **Google** → Enable.
+2. Follow the inline instructions to create a Google OAuth client and paste the client ID + secret.
+3. Add `http://localhost:5173` and your deployed URL to the **Redirect URLs** allow-list under **Authentication** → **URL Configuration**.
+
+### 5. (Optional) Disable email confirmation for faster local testing
+
+Dashboard → **Authentication** → **Sign In / Up** → uncheck **Confirm email**. This lets you log in immediately after signing up without clicking a confirmation link.
+
 ## Local Setup
 
 ### 1. Clone the repository
