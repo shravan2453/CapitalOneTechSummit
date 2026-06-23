@@ -60,14 +60,26 @@ If you don't already have a Supabase project for this app:
 
 ### 4. Environment variables
 
-Create `.env.local` in the project root:
+Copy [`.env.example`](./.env.example) to `.env.local` and fill in real values:
 
-```env
-VITE_SUPABASE_URL=https://your-project-ref.supabase.co
-VITE_SUPABASE_ANON_KEY=your-publishable-or-anon-key
+```bash
+cp .env.example .env.local
 ```
 
-The `VITE_` prefix is required — Vite ignores any other prefix. `.env.local` is gitignored.
+```env
+# Required - frontend
+VITE_SUPABASE_URL=https://your-project-ref.supabase.co
+VITE_SUPABASE_ANON_KEY=your-publishable-or-anon-key
+
+# Optional - only needed if you want the Luna chatbot (Education page) to work.
+# This key is used by the /api/gemini serverless function and must NEVER be
+# prefixed with VITE_ (Vite would inline it into the browser bundle).
+OPENAI_API_KEY=sk-proj-your-openai-key-here
+```
+
+- The `VITE_` prefix is required for any var the browser needs — Vite ignores any other prefix.
+- `OPENAI_API_KEY` is **server-side only**. Locally it's read by `/api/gemini` if you run via `vercel dev`; on Vercel/Netlify, add it under the project's Environment Variables settings.
+- `.env.local` is gitignored. Never commit it.
 
 ### 5. Run
 

@@ -1,14 +1,14 @@
-// OpenAI API Key
-const OPENAI_API_KEY = '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';
-
-// Validate API key format
-if (!OPENAI_API_KEY || OPENAI_API_KEY.length < 20) {
-  console.warn('Warning: API key may be invalid');
-}
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (!OPENAI_API_KEY) {
+    return res.status(500).json({
+      error: 'Server misconfigured: OPENAI_API_KEY environment variable is not set.',
+    });
   }
 
   try {

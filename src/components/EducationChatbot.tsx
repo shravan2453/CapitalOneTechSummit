@@ -66,80 +66,25 @@ User Question: ${currentInput}
 
 Please provide a helpful, friendly answer based only on the Education page content above. Write in a clean, natural way without asterisks, em dashes, or markdown formatting. Use simple line breaks and colons for structure. Remember to be warm and approachable.`;
 
-      // Use OpenAI API directly (proxy will be used in production)
-      const API_KEY = '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';
-      
-      let response: Response;
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt })
+      });
+
+      const responseText = await response.text();
+
+      if (!responseText || responseText.trim() === '') {
+        throw new Error('Empty response from /api/gemini. In local dev, the chatbot needs the serverless function running (deploy to Vercel, or run `vercel dev`). API keys must never be called directly from the browser.');
+      }
+
       let responseData: any;
-
-      // Try proxy first (for production), then direct call
       try {
-        response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt })
-        });
-        
-        const responseText = await response.text();
-        
-        if (!responseText || responseText.trim() === '') {
-          throw new Error('Empty response from proxy');
-        }
-        
-        try {
-          responseData = JSON.parse(responseText);
-        } catch (parseError) {
-          throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
-        }
-      } catch (proxyError: any) {
-        // Fallback to direct OpenAI API call
-        console.log('Proxy failed, using direct API call...', proxyError.message);
-        
-        response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-3.5-turbo',
-            messages: [
-              {
-                role: 'user',
-                content: prompt
-              }
-            ],
-            temperature: 0.7,
-            max_tokens: 1024
-          })
-        });
-
-        const responseText = await response.text();
-        
-        if (!responseText) {
-          throw new Error('Empty response from OpenAI API');
-        }
-
-        try {
-          responseData = JSON.parse(responseText);
-        } catch (parseError) {
-          throw new Error(`Invalid JSON response from OpenAI: ${responseText.substring(0, 100)}`);
-        }
-
-        // Transform OpenAI response to expected format
-        if (response.ok && responseData.choices?.[0]?.message?.content) {
-          responseData = {
-            candidates: [{
-              content: {
-                parts: [{
-                  text: responseData.choices[0].message.content
-                }]
-              }
-            }]
-          };
-        }
+        responseData = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error(`Invalid JSON response: ${responseText.substring(0, 100)}`);
       }
       
       if (!response.ok) {
